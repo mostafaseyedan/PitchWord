@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+.npm
+.npm-cache
+
+# Build
+dist
+dist-ssr
+*.local
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Tests
+coverage
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frameworks
+.vite
+.next
+.turbo
+.cache
+*.tsbuildinfo
+
+# Application specific
+uploads/
+temp/
