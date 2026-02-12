@@ -40,6 +40,9 @@ export class RunService {
         requestedMedia: payload.requestedMedia ?? "image_only",
         aspectRatio: payload.aspectRatio ?? "16:9",
         imageResolution: payload.imageResolution ?? "1K",
+        videoDurationSeconds: payload.videoDurationSeconds ?? 8,
+        videoAspectRatio: payload.videoAspectRatio ?? "16:9",
+        videoResolution: payload.videoResolution ?? "720p",
         imageStyleInstruction: payload.imageStyleInstruction
       }
     });

@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { ASPECT_RATIOS, CATEGORIES, IMAGE_RESOLUTIONS, TONES } from "@marketing/shared";
+import {
+  ASPECT_RATIOS,
+  CATEGORIES,
+  IMAGE_RESOLUTIONS,
+  TONES,
+  VIDEO_ASPECT_RATIOS,
+  VIDEO_RESOLUTIONS
+} from "@marketing/shared";
 import type { RouteRegistrar } from "./types.js";
 
 const dailySchema = z.object({
@@ -8,6 +15,9 @@ const dailySchema = z.object({
   requestedMedia: z.enum(["image_only", "image_video"]).optional(),
   aspectRatio: z.enum(ASPECT_RATIOS).optional(),
   imageResolution: z.enum(IMAGE_RESOLUTIONS).optional(),
+  videoDurationSeconds: z.union([z.literal(4), z.literal(6), z.literal(8)]).optional(),
+  videoAspectRatio: z.enum(VIDEO_ASPECT_RATIOS).optional(),
+  videoResolution: z.enum(VIDEO_RESOLUTIONS).optional(),
   imageStyleInstruction: z.string().max(1200).optional()
 });
 
@@ -21,6 +31,9 @@ const manualSchema = z.object({
     selectedNewsTopic: z.string().optional(),
     aspectRatio: z.enum(ASPECT_RATIOS).default("16:9"),
     imageResolution: z.enum(IMAGE_RESOLUTIONS).default("1K"),
+    videoDurationSeconds: z.union([z.literal(4), z.literal(6), z.literal(8)]).default(8),
+    videoAspectRatio: z.enum(VIDEO_ASPECT_RATIOS).default("16:9"),
+    videoResolution: z.enum(VIDEO_RESOLUTIONS).default("720p"),
     imageStyleInstruction: z.string().max(1200).optional()
   })
 });
@@ -30,8 +43,7 @@ const retryStepSchema = z.object({
 });
 
 const postToTeamsSchema = z.object({
-  teamId: z.string().optional().default(""),
-  channelId: z.string().optional().default("")
+  recipientEmails: z.array(z.string().email()).min(1)
 });
 
 export const registerRunRoutes: RouteRegistrar = (app, deps) => {

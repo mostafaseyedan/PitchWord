@@ -2,6 +2,8 @@ import type { Category, Citation, Tone } from "@marketing/shared";
 import { GoogleGenAI } from "@google/genai";
 import { env } from "../config/env.js";
 import { CENDIEN_CONTENT_GOAL, CENDIEN_CONTEXT, buildPainPointContext } from "../agents/prompts/brand-context.js";
+import { buildGroundingTools, createGeminiClient } from "./gemini-grounding.js";
+import { extractGroundingCitations } from "./grounding-citations.js";
 
 export interface NewsResult {
   topic: string;
@@ -21,6 +23,7 @@ export interface NewsDiscoveryOutput {
 
 export class NewsHunterService {
   private ai = env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }) : undefined;
+  private vertexAi = createGeminiClient();
 
   async discover(topicHint: string | undefined, tone: Tone, category: Category): Promise<NewsDiscoveryOutput> {
     if (topicHint?.trim()) {
@@ -103,6 +106,74 @@ export class NewsHunterService {
         topic,
         summary,
         citations: []
+      },
+      meta: {
+        model: env.GEMINI_TEXT_MODEL,
+        prompt,
+        rawResponseText: text,
+        systemInstruction
+      }
+    };
+  }
+
+  async discoverFromDatastore(query: string, tone: Tone, category: Category): Promise<NewsDiscoveryOutput> {
+    if (!this.vertexAi) {
+      throw new Error("Vertex client is required for datastore discovery. Set VERTEX_GCLOUD_PROJECT.");
+    }
+
+    const systemInstruction = [
+      "You are a topic discovery agent for Cendien.",
+      CENDIEN_CONTEXT,
+      CENDIEN_CONTENT_GOAL,
+      "Your job is to search the internal datastore and find one specific, concrete topic for a LinkedIn post.",
+      "Use the retrieval tool to search the datastore. Base your answer on retrieved content only.",
+      "Do not invent or fabricate information. Only use what the datastore returns."
+    ].join(" ");
+
+    const prompt = [
+      `Search the datastore for content related to: ${query}`,
+      `Category: ${category}`,
+      `Tone: ${tone}`,
+      "",
+      "From the retrieved content, pick ONE specific, concrete topic for a LinkedIn post.",
+      "Return plain text only.",
+      "Format:",
+      "1) First line: specific topic title (max 12 words). Must reference a real name, project, or detail from the datastore.",
+      "2) Then 2-3 sentences summarizing the specific content found, with concrete details (names, technologies, outcomes).",
+      "Do not be generic. Do not include links, citations, markdown, or JSON."
+    ].join("\n");
+
+    const response = await this.vertexAi.models.generateContent({
+      model: env.GEMINI_TEXT_MODEL,
+      contents: prompt,
+      config: {
+        tools: buildGroundingTools() as any,
+        systemInstruction,
+        temperature: 0.7,
+        maxOutputTokens: 2000
+      }
+    });
+
+    const text = this.extractText(response);
+    if (!text) {
+      throw new Error("Gemini returned empty response for datastore topic discovery.");
+    }
+
+    const citations = extractGroundingCitations(response);
+
+    const lines = text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    const topic = this.cleanTopic(lines[0] ?? query);
+    const summary = this.cleanSummary(lines.slice(1).join(" ").trim() || text.trim());
+
+    return {
+      result: {
+        topic,
+        summary,
+        citations
       },
       meta: {
         model: env.GEMINI_TEXT_MODEL,

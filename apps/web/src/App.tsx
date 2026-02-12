@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import * as Tabs from "@radix-ui/react-tabs";
-import type { AspectRatio, Category, ImageResolution, ManualRunRequest, Tone } from "@marketing/shared";
+import type {
+  AspectRatio,
+  Category,
+  ImageResolution,
+  ManualRunRequest,
+  Tone,
+  VideoAspectRatio,
+  VideoDuration,
+  VideoResolution
+} from "@marketing/shared";
 import { apiClient } from "./api/client";
 import { useDashboardData } from "./hooks/use-dashboard-data";
 import { Sidebar, type ViewName } from "./components/layout/Sidebar";
@@ -28,10 +37,12 @@ function App() {
   const [mediaMode, setMediaMode] = useState<"image_only" | "image_video">("image_only");
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("16:9");
   const [imageResolution, setImageResolution] = useState<ImageResolution>("1K");
+  const [videoDurationSeconds, setVideoDurationSeconds] = useState<VideoDuration>(8);
+  const [videoAspectRatio, setVideoAspectRatio] = useState<VideoAspectRatio>("16:9");
+  const [videoResolution, setVideoResolution] = useState<VideoResolution>("720p");
   const [imageStyleInstruction, setImageStyleInstruction] = useState("");
 
-  const [teamId, setTeamId] = useState("");
-  const [channelId, setChannelId] = useState("");
+  const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
   const [teamsDefaultsLoaded, setTeamsDefaultsLoaded] = useState(false);
 
   const [uploadedFileRefs, setUploadedFileRefs] = useState<string[]>([]);
@@ -47,8 +58,7 @@ function App() {
         if (cancelled) {
           return;
         }
-        setTeamId(defaults.teamId);
-        setChannelId(defaults.channelId);
+        setRecipientEmails(defaults.recipientEmails);
       } catch (loadError) {
         if (!cancelled) {
           setError(loadError instanceof Error ? loadError.message : String(loadError));
@@ -67,12 +77,12 @@ function App() {
   }, [setError]);
 
   useEffect(() => {
-    if (!teamsDefaultsLoaded || !teamId || !channelId) {
+    if (!teamsDefaultsLoaded || recipientEmails.length === 0) {
       return;
     }
 
     const timer = window.setTimeout(() => {
-      void apiClient.setTeamsDefaults({ teamId, channelId }).catch((saveError) => {
+      void apiClient.setTeamsDefaults({ recipientEmails }).catch((saveError) => {
         setError(saveError instanceof Error ? saveError.message : String(saveError));
       });
     }, 400);
@@ -80,7 +90,7 @@ function App() {
     return () => {
       window.clearTimeout(timer);
     };
-  }, [teamsDefaultsLoaded, teamId, channelId, setError]);
+  }, [teamsDefaultsLoaded, recipientEmails, setError]);
 
   useEffect(() => {
     if (!selectedRunId && runs.length > 0) {
@@ -153,6 +163,9 @@ function App() {
         requestedMedia: mediaMode,
         aspectRatio,
         imageResolution,
+        videoDurationSeconds,
+        videoAspectRatio,
+        videoResolution,
         imageStyleInstruction: imageStyleInstruction || undefined
       });
       setActiveRunId(run.id);
@@ -176,6 +189,9 @@ function App() {
         requestedMedia: mediaMode,
         aspectRatio,
         imageResolution,
+        videoDurationSeconds,
+        videoAspectRatio,
+        videoResolution,
         imageStyleInstruction: imageStyleInstruction || undefined
       },
     };
@@ -232,7 +248,7 @@ function App() {
     }
     try {
       setBusy(true);
-      await apiClient.postToTeams(selectedRun.id, { teamId, channelId });
+      await apiClient.postToTeams(selectedRun.id, { recipientEmails });
     } catch (postError) {
       setError(postError instanceof Error ? postError.message : String(postError));
     } finally {
@@ -300,6 +316,12 @@ function App() {
                     onAspectRatioChange={setAspectRatio}
                     imageResolution={imageResolution}
                     onImageResolutionChange={setImageResolution}
+                    videoDurationSeconds={videoDurationSeconds}
+                    onVideoDurationSecondsChange={setVideoDurationSeconds}
+                    videoAspectRatio={videoAspectRatio}
+                    onVideoAspectRatioChange={setVideoAspectRatio}
+                    videoResolution={videoResolution}
+                    onVideoResolutionChange={setVideoResolution}
                     imageStyleInstruction={imageStyleInstruction}
                     onImageStyleInstructionChange={setImageStyleInstruction}
                     newsTopic={selectedNewsTopic}
@@ -345,10 +367,8 @@ function App() {
                 <div className="lg:col-span-8">
                   <PreviewDeliveryPanel
                     selectedRun={selectedRun}
-                    teamId={teamId}
-                    onTeamIdChange={setTeamId}
-                    channelId={channelId}
-                    onChannelIdChange={setChannelId}
+                    recipientEmails={recipientEmails}
+                    onRecipientEmailsChange={setRecipientEmails}
                     onPostToTeams={handlePostToTeams}
                     onRetryTeams={handleRetryTeams}
                     busy={busy}

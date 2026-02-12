@@ -10,8 +10,7 @@ import type {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 export interface TeamsDefaults {
-  teamId: string;
-  channelId: string;
+  recipientEmails: string[];
 }
 
 const parseJson = async <T>(response: Response): Promise<T> => {

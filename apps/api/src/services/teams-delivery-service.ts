@@ -8,6 +8,11 @@ interface PostRequest {
   channelId?: string;
 }
 
+interface PostToUserRequest {
+  run: Run;
+  recipientEmails: string[];
+}
+
 export interface TeamsPostOutput {
   result: TeamsDelivery;
   meta: {
@@ -84,6 +89,63 @@ export class TeamsDeliveryService {
         teamId: resolvedTeamId,
         channelId: resolvedChannelId,
         deliveryMethod: "graph"
+      }
+    };
+  }
+
+  async postToUser({ run, recipientEmails }: PostToUserRequest): Promise<TeamsPostOutput> {
+    const draft = run.draft;
+    if (!draft) {
+      throw new Error("Cannot post to Teams without generated draft content.");
+    }
+
+    if (!env.TEAMS_DM_WEBHOOK_URL) {
+      throw new Error("TEAMS_DM_WEBHOOK_URL is required for direct user messaging.");
+    }
+
+    const messageBody = this.buildDmHtml(draft, run.assets);
+    const errors: string[] = [];
+    let lastStatus = 200;
+
+    for (const recipientEmail of recipientEmails) {
+      const payload = {
+        recipientEmail,
+        messageBody
+      };
+
+      const response = await fetch(env.TEAMS_DM_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      lastStatus = response.status;
+
+      if (!response.ok) {
+        const text = await response.text();
+        errors.push(`${recipientEmail}: ${response.status} - ${text}`);
+      }
+    }
+
+    if (errors.length === recipientEmails.length) {
+      throw new Error(`Teams DM webhook failed for all recipients:\n${errors.join("\n")}`);
+    }
+
+    return {
+      result: {
+        runId: run.id,
+        teamId: "dm",
+        channelId: recipientEmails.join(", "),
+        status: "posted",
+        messageId: undefined,
+        postedAt: nowIso()
+      },
+      meta: {
+        graphApiStatus: lastStatus,
+        messageId: undefined,
+        teamId: "dm",
+        channelId: recipientEmails.join(", "),
+        deliveryMethod: "webhook"
       }
     };
   }
@@ -309,6 +371,29 @@ export class TeamsDeliveryService {
       .replace(/>/g, "&gt;")
       .replace(/\"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  private buildDmHtml(draft: ContentDraft, assets: Run["assets"]): string {
+    const image = assets.find((asset) => asset.type === "image");
+    const video = assets.find((asset) => asset.type === "video");
+    const imageUrl = image ? this.getShareableUrl(image.uri) : undefined;
+    const videoUrl = video ? this.getShareableUrl(video.uri) : undefined;
+
+    const lines = [
+      `<h3>${this.escapeHtml(draft.title)}</h3>`,
+      `<p><strong>${this.escapeHtml(draft.hook)}</strong></p>`,
+      ...(imageUrl
+        ? [`<p><img src="${imageUrl}" alt="Generated campaign image" style="max-width:100%;border-radius:8px;" /></p>`]
+        : []),
+      `<p>${this.escapeHtml(draft.body).replace(/\n/g, "<br/>")}</p>`,
+      `<p><em>${this.escapeHtml(draft.cta)}</em></p>`
+    ];
+
+    if (videoUrl) {
+      lines.push(`<p><video src="${videoUrl}" controls style="max-width:100%;border-radius:8px;"></video></p>`);
+    }
+
+    return lines.join("\n");
   }
 
   private getShareableUrl(uri: string): string | undefined {

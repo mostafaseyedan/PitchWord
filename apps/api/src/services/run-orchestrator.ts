@@ -51,20 +51,8 @@ export class RunOrchestrator {
           const manualIdea = run.input.manualIdeaText?.trim();
 
           if (run.category !== "industry_news") {
-            const grounded = this.buildGroundedTopicForNonNewsCategory(run);
-            return {
-              result: {
-                topic: grounded.topic,
-                summary: grounded.summary,
-                citations: [] as Citation[]
-              },
-              meta: {
-                model: "skipped",
-                prompt: "",
-                rawResponseText: undefined,
-                systemInstruction: "news_hunter skipped because category is not industry_news"
-              }
-            };
+            const query = manualIdea || selectedTopic || this.defaultGroundedQueryByCategory(run.category);
+            return this.newsHunterService.discoverFromDatastore(query, run.tone, run.category);
           }
 
           if (selectedTopic) {
@@ -171,7 +159,7 @@ export class RunOrchestrator {
         // Video requested: mark review_ready now, deliver to Teams after video completes
         await this.repository.setRunStatus(run.id, "review_ready");
         await this.publishRun(run.id);
-        this.startVideoInBackground(run.id, draft, imageAsset.uri);
+        this.startVideoInBackground(run.id, draft, run.input, run.category, imageAsset.uri);
       } else {
         // Image only: deliver to Teams immediately
         await this.deliverOrFinalize(run.id);
@@ -186,15 +174,22 @@ export class RunOrchestrator {
   async retryStep(runId: string, request: RetryStepRequest): Promise<Run> {
     const run = await this.requireRun(runId);
 
-    if (request.stepName === "teams_delivery") {
-      if (!env.TEAMS_WEBHOOK_URL && (!env.TEAMS_DRAFT_TEAM_ID || !env.TEAMS_DRAFT_CHANNEL_ID)) {
-        throw new Error("Cannot retry teams delivery without TEAMS_WEBHOOK_URL or draft team/channel env values");
+    if (request.stepName === "video_agent") {
+      if (!run.draft) {
+        throw new Error("Cannot retry video generation without a content draft.");
       }
-      await this.postToTeams(runId, {
-        teamId: env.TEAMS_DRAFT_TEAM_ID ?? "",
-        channelId: env.TEAMS_DRAFT_CHANNEL_ID ?? ""
-      });
+      const imageAsset = [...run.assets].reverse().find((asset) => asset.type === "image");
+      if (!imageAsset) {
+        throw new Error("Cannot retry video generation without an existing image asset.");
+      }
+
+      // Keep current run state and regenerate video from existing draft + image.
+      this.startVideoInBackground(run.id, run.draft, run.input, run.category, imageAsset.uri);
       return this.requireRun(runId);
+    }
+
+    if (request.stepName === "teams_delivery") {
+      throw new Error("Use the 'Send to user' action to deliver to Teams. Retry is not supported for DM delivery.");
     }
 
     await this.executeRun(runId);
@@ -211,10 +206,9 @@ export class RunOrchestrator {
       runId,
       "teams_delivery",
       async () => {
-        const teamsOutput = await this.teamsDeliveryService.postDraft({
+        const teamsOutput = await this.teamsDeliveryService.postToUser({
           run,
-          teamId: request.teamId ?? "",
-          channelId: request.channelId ?? ""
+          recipientEmails: request.recipientEmails
         });
         await this.repository.setTeamsDelivery(runId, teamsOutput.result);
         await this.repository.setRunStatus(runId, "posted");
@@ -356,7 +350,13 @@ export class RunOrchestrator {
    * Fires off video generation and polls in the background.
    * The run is already marked review_ready/posted — video attaches when done.
    */
-  private startVideoInBackground(runId: string, draft: ContentDraft, imageUri: string): void {
+  private startVideoInBackground(
+    runId: string,
+    draft: ContentDraft,
+    input: Run["input"],
+    category: Run["category"],
+    imageUri: string
+  ): void {
     const startedAt = nowIso();
 
     this.appendLog({
@@ -369,7 +369,7 @@ export class RunOrchestrator {
     }).catch(() => {});
 
     this.videoAgentService
-      .start(runId, draft, imageUri)
+      .start(runId, draft, input, category, imageUri)
       .then((startOutput) => {
         this.pollVideoUntilDone(runId, startOutput.result, Date.now(), startedAt, startOutput.meta);
       })
@@ -400,7 +400,7 @@ export class RunOrchestrator {
 
   private pollVideoUntilDone(
     runId: string,
-    operationName: string,
+    operation: unknown,
     startMs: number,
     startedAt: string,
     videoMeta: Record<string, unknown>
@@ -411,7 +411,8 @@ export class RunOrchestrator {
     const tick = async (): Promise<void> => {
       attempt++;
       try {
-        const polled = await this.videoAgentService.poll(operationName);
+        const polled = await this.videoAgentService.poll(operation);
+        operation = polled.operation;
 
         if (polled.done && polled.uri) {
           const generationMs = Date.now() - startMs;

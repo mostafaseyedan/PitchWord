@@ -14,6 +14,9 @@ describe("InMemoryRunRepository", () => {
         requestedMedia: "image_only",
         aspectRatio: "16:9",
         imageResolution: "1K",
+        videoDurationSeconds: 8,
+        videoAspectRatio: "16:9",
+        videoResolution: "720p",
         manualIdeaText: "Idea"
       }
     });

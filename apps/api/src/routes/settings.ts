@@ -2,8 +2,7 @@ import { z } from "zod";
 import type { RouteRegistrar } from "./types.js";
 
 const teamsDefaultsSchema = z.object({
-  teamId: z.string().min(1),
-  channelId: z.string().min(1)
+  recipientEmails: z.array(z.string().email())
 });
 
 export const registerSettingsRoutes: RouteRegistrar = (app, deps) => {

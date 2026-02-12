@@ -1,7 +1,8 @@
 {
   "teamsDefaults": {
-    "teamId": "635b9e2e-03f1-48df-8848-befaad903df5",
-    "channelId": "19:49b502f7eb7a4a66a82406d525da8cb5@thread.tacv2",
-    "updatedAt": "2026-02-12T01:31:10.734Z"
+    "recipientEmails": [
+      "malsayyedan@cendien.com"
+    ],
+    "updatedAt": "2026-02-12T18:07:30.439Z"
   }
 }

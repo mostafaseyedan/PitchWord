@@ -46,6 +46,18 @@ export const IMAGE_RESOLUTIONS = ["1K", "2K", "4K"] as const;
 
 export type ImageResolution = (typeof IMAGE_RESOLUTIONS)[number];
 
+export const VIDEO_DURATIONS = [4, 6, 8] as const;
+
+export type VideoDuration = (typeof VIDEO_DURATIONS)[number];
+
+export const VIDEO_ASPECT_RATIOS = ["9:16", "16:9"] as const;
+
+export type VideoAspectRatio = (typeof VIDEO_ASPECT_RATIOS)[number];
+
+export const VIDEO_RESOLUTIONS = ["720p", "1080p", "4k"] as const;
+
+export type VideoResolution = (typeof VIDEO_RESOLUTIONS)[number];
+
 export interface Citation {
   sourceUrl: string;
   snippet: string;
@@ -112,6 +124,9 @@ export interface RunInput {
   selectedNewsTopic?: string;
   aspectRatio: AspectRatio;
   imageResolution: ImageResolution;
+  videoDurationSeconds: VideoDuration;
+  videoAspectRatio: VideoAspectRatio;
+  videoResolution: VideoResolution;
   imageStyleInstruction?: string;
 }
 
@@ -144,6 +159,9 @@ export interface DailyRunRequest {
   requestedMedia?: "image_only" | "image_video";
   aspectRatio?: AspectRatio;
   imageResolution?: ImageResolution;
+  videoDurationSeconds?: VideoDuration;
+  videoAspectRatio?: VideoAspectRatio;
+  videoResolution?: VideoResolution;
   imageStyleInstruction?: string;
 }
 
@@ -152,8 +170,7 @@ export interface RetryStepRequest {
 }
 
 export interface PostToTeamsRequest {
-  teamId?: string;
-  channelId?: string;
+  recipientEmails: string[];
 }
 
 export interface AnalyticsSummary {

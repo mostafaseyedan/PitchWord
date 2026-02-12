@@ -144,9 +144,17 @@ export class MediaStorageService {
   }
 
   private async persistHttpUriAsset(asset: Asset): Promise<PersistedAssetOutput> {
-    const response = await fetch(asset.uri);
+    const response = await this.fetchRemoteMedia(asset.uri);
     if (!response.ok) {
-      throw new Error(`Failed to fetch remote media (${response.status})`);
+      return {
+        result: asset,
+        meta: {
+          uploadedToGcs: false,
+          sourceScheme: this.detectUriScheme(asset.uri),
+          shareMode: "none",
+          error: `Failed to fetch remote media (${response.status})`
+        }
+      };
     }
 
     const responseBytes = await response.arrayBuffer();
@@ -183,6 +191,69 @@ export class MediaStorageService {
         shareMode: share.mode
       }
     };
+  }
+
+  private async fetchRemoteMedia(uri: string): Promise<Response> {
+    const initial = await fetch(uri);
+    if (initial.ok) {
+      return initial;
+    }
+
+    const canRetryWithGeminiAuth =
+      Boolean(env.GEMINI_API_KEY) &&
+      (initial.status === 401 || initial.status === 403) &&
+      this.isGoogleHostedMediaUrl(uri);
+
+    if (!canRetryWithGeminiAuth) {
+      return initial;
+    }
+
+    const withHeader = await fetch(uri, {
+      headers: {
+        "x-goog-api-key": env.GEMINI_API_KEY!
+      }
+    });
+    if (withHeader.ok) {
+      return withHeader;
+    }
+
+    const uriWithKey = this.appendApiKeyQuery(uri, env.GEMINI_API_KEY!);
+    if (!uriWithKey || uriWithKey === uri) {
+      return withHeader;
+    }
+
+    return fetch(uriWithKey);
+  }
+
+  private isGoogleHostedMediaUrl(uri: string): boolean {
+    try {
+      const host = new URL(uri).hostname.toLowerCase();
+      return (
+        host === "googleapis.com" ||
+        host.endsWith(".googleapis.com") ||
+        host === "googleusercontent.com" ||
+        host.endsWith(".googleusercontent.com") ||
+        host === "gvt1.com" ||
+        host.endsWith(".gvt1.com")
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  private appendApiKeyQuery(uri: string, apiKey: string): string | undefined {
+    try {
+      const parsed = new URL(uri);
+      if (!parsed.hostname.toLowerCase().endsWith(".googleapis.com") && parsed.hostname.toLowerCase() !== "googleapis.com") {
+        return undefined;
+      }
+      if (!parsed.searchParams.has("key")) {
+        parsed.searchParams.set("key", apiKey);
+      }
+      return parsed.toString();
+    } catch {
+      return undefined;
+    }
   }
 
   private async getShareableUrl(file: File): Promise<{ url: string; mode: ShareMode }> {

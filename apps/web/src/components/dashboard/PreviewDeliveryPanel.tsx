@@ -1,17 +1,96 @@
 import type { Run } from "@marketing/shared";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../common/Button";
-import { InputField } from "../common/InputField";
-import { Download, Link as LinkIcon, Check } from "lucide-react";
-import { useState, useCallback, useEffect } from "react";
+import { Download, Link as LinkIcon, Check, X, Mail } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import * as Tooltip from "@radix-ui/react-tooltip";
+
+const EMAIL_DOMAIN = "@cendien.com";
+
+function RecipientTagInput({
+  emails,
+  onChange,
+}: {
+  emails: string[];
+  onChange: (emails: string[]) => void;
+}) {
+  const [inputValue, setInputValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const addRecipient = (raw: string) => {
+    const username = raw.trim().replace(/@cendien\.com$/i, "");
+    if (!username) return;
+    const email = `${username}${EMAIL_DOMAIN}`;
+    if (emails.includes(email)) return;
+    onChange([...emails, email]);
+    setInputValue("");
+  };
+
+  const removeRecipient = (email: string) => {
+    onChange(emails.filter((e) => e !== email));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addRecipient(inputValue);
+    }
+    if (e.key === "Backspace" && !inputValue && emails.length > 0) {
+      removeRecipient(emails[emails.length - 1]!);
+    }
+  };
+
+  return (
+    <div className="max-w-lg">
+      <label className="block text-[12px] font-semibold text-secondary/70 tracking-[0.02em] mb-1.5">
+        Recipients
+      </label>
+      <div
+        className="flex flex-wrap items-center gap-2 min-h-[44px] px-3 py-2 rounded-xl border border-border-warm bg-white/60 focus-within:border-gold/50 focus-within:ring-2 focus-within:ring-gold/10 transition-all cursor-text"
+        onClick={() => inputRef.current?.focus()}
+      >
+        {emails.map((email) => {
+          const username = email.replace(EMAIL_DOMAIN, "");
+          return (
+            <span
+              key={email}
+              className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-[#3b342b]/8 text-[13px] font-medium text-primary border border-[#3b342b]/10"
+            >
+              <Mail size={12} className="text-secondary/50 shrink-0" />
+              <span>{username}<span className="text-secondary/40">{EMAIL_DOMAIN}</span></span>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); removeRecipient(email); }}
+                className="ml-0.5 p-0.5 rounded hover:bg-[#3b342b]/10 transition-colors"
+              >
+                <X size={12} className="text-secondary/60" />
+              </button>
+            </span>
+          );
+        })}
+        <div className="inline-flex items-center flex-1 min-w-[120px]">
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={() => { if (inputValue.trim()) addRecipient(inputValue); }}
+            placeholder={emails.length === 0 ? "username" : "add another..."}
+            className="w-full bg-transparent outline-none text-[14px] text-primary placeholder:text-secondary/30"
+          />
+          <span className="text-[13px] text-secondary/40 shrink-0 select-none pointer-events-none">{EMAIL_DOMAIN}</span>
+        </div>
+      </div>
+      <p className="text-[11px] text-secondary/40 mt-1.5">Press Enter or comma to add. Backspace to remove last.</p>
+    </div>
+  );
+}
 
 interface PreviewDeliveryPanelProps {
   selectedRun: Run | undefined;
-  teamId: string;
-  onTeamIdChange: (value: string) => void;
-  channelId: string;
-  onChannelIdChange: (value: string) => void;
+  recipientEmails: string[];
+  onRecipientEmailsChange: (value: string[]) => void;
   onPostToTeams: () => void;
   onRetryTeams: () => void;
   busy: boolean;
@@ -19,10 +98,8 @@ interface PreviewDeliveryPanelProps {
 
 export const PreviewDeliveryPanel = ({
   selectedRun,
-  teamId,
-  onTeamIdChange,
-  channelId,
-  onChannelIdChange,
+  recipientEmails,
+  onRecipientEmailsChange,
   onPostToTeams,
   onRetryTeams,
   busy,
@@ -212,12 +289,12 @@ export const PreviewDeliveryPanel = ({
         {/* Teams form */}
         <div className="mt-8 pt-8 border-t border-border-warm/30">
           <div className="text-label-small mb-4 opacity-50">Teams Integration</div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <InputField id="team-id" label="Team ID" value={teamId} onChange={onTeamIdChange} placeholder="team-id" />
-            <InputField id="channel-id" label="Channel ID" value={channelId} onChange={onChannelIdChange} placeholder="channel-id" />
-          </div>
-          <div className="flex gap-3">
-            <Button variant="espresso" loading={busy} onClick={onPostToTeams}>Post to teams</Button>
+          <RecipientTagInput
+            emails={recipientEmails}
+            onChange={onRecipientEmailsChange}
+          />
+          <div className="flex gap-3 mt-4">
+            <Button variant="espresso" loading={busy} onClick={onPostToTeams} disabled={recipientEmails.length === 0}>Send to {recipientEmails.length === 1 ? "user" : `${recipientEmails.length} users`}</Button>
             <Button variant="secondary" loading={busy} onClick={onRetryTeams}>Retry teams step</Button>
           </div>
         </div>

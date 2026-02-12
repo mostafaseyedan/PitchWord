@@ -1,5 +1,13 @@
 import { useRef } from "react";
-import type { AspectRatio, Category, ImageResolution, Tone } from "@marketing/shared";
+import type {
+  AspectRatio,
+  Category,
+  ImageResolution,
+  Tone,
+  VideoAspectRatio,
+  VideoDuration,
+  VideoResolution
+} from "@marketing/shared";
 import { Upload, Play, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "../common/Button";
@@ -19,6 +27,12 @@ interface RunSetupPanelProps {
   onAspectRatioChange: (value: AspectRatio) => void;
   imageResolution: ImageResolution;
   onImageResolutionChange: (value: ImageResolution) => void;
+  videoDurationSeconds: VideoDuration;
+  onVideoDurationSecondsChange: (value: VideoDuration) => void;
+  videoAspectRatio: VideoAspectRatio;
+  onVideoAspectRatioChange: (value: VideoAspectRatio) => void;
+  videoResolution: VideoResolution;
+  onVideoResolutionChange: (value: VideoResolution) => void;
   imageStyleInstruction: string;
   onImageStyleInstructionChange: (value: string) => void;
   newsTopic: string;
@@ -44,14 +58,14 @@ const toneOptions: { value: Tone; label: string }[] = [
   { value: "absurd", label: "Absurd" }
 ];
 
-const categoryOptions: { value: Category; label: string }[] = [
-  { value: "industry_news", label: "Industry trend" },
-  { value: "customer_pain_point", label: "Pain point" },
-  { value: "company_update", label: "Update" },
-  { value: "hiring", label: "Hiring" },
-  { value: "product_education", label: "Education" },
-  { value: "infor", label: "Infor" },
-  { value: "team", label: "Team" }
+const categoryOptions: { value: Category; label: string; tooltip: string }[] = [
+  { value: "industry_news", label: "Industry trend", tooltip: "Recent enterprise tech developments affecting ITSM, Microsoft, and Infor markets.\nVisual: cinematic command center with holographic data panels and strong directional lighting." },
+  { value: "customer_pain_point", label: "Pain point", tooltip: "Frame around recurring customer friction like skills gaps, upgrade fatigue, or key-person dependency.\nVisual: vintage blueprint infographic with technical annotations, isometric elements, and sepia overlay." },
+  { value: "company_update", label: "Update", tooltip: "Highlight a recent Cendien project win, delivery milestone, or capability expansion.\nVisual: premium corporate announcement with architectural lines, polished surfaces, and abstract transformation motifs." },
+  { value: "hiring", label: "Hiring", tooltip: "Spotlight team growth needs with clear role and value framing for ITSM, Microsoft, or Infor consulting.\nVisual: elite recruiting campaign with diverse professionals collaborating in a contemporary tech office." },
+  { value: "product_education", label: "Education", tooltip: "Teach a specific ITSM, Microsoft, or Infor concept with a practical how-to angle.\nVisual: realistic 3D render of a single object, half photorealistic and half wireframe interior cutaway." },
+  { value: "infor", label: "Infor", tooltip: "Focus on Infor ERP modernization, integration challenges, and operational transformation.\nVisual: strategic enterprise integration scene with layered interface elements across finance, supply chain, and service operations." },
+  { value: "team", label: "Team", tooltip: "Spotlight team members, culture, expertise, and trusted delivery capability.\nVisual: professional group photo composited from real team reference images in a modern office setting." }
 ];
 
 const mediaModeOptions: { value: "image_only" | "image_video"; label: string }[] = [
@@ -76,6 +90,23 @@ const imageResolutionOptions: { value: ImageResolution; label: string }[] = [
   { value: "4K", label: "4K" }
 ];
 
+const videoDurationOptions: { value: VideoDuration; label: string }[] = [
+  { value: 4, label: "4s" },
+  { value: 6, label: "6s" },
+  { value: 8, label: "8s" }
+];
+
+const videoAspectRatioOptions: { value: VideoAspectRatio; label: string }[] = [
+  { value: "16:9", label: "16:9" },
+  { value: "9:16", label: "9:16" }
+];
+
+const videoResolutionOptions: { value: VideoResolution; label: string }[] = [
+  { value: "720p", label: "720p" },
+  { value: "1080p", label: "1080p" },
+  { value: "4k", label: "4K" }
+];
+
 export const RunSetupPanel = ({
   tone,
   onToneChange,
@@ -87,6 +118,12 @@ export const RunSetupPanel = ({
   onAspectRatioChange,
   imageResolution,
   onImageResolutionChange,
+  videoDurationSeconds,
+  onVideoDurationSecondsChange,
+  videoAspectRatio,
+  onVideoAspectRatioChange,
+  videoResolution,
+  onVideoResolutionChange,
   imageStyleInstruction,
   onImageStyleInstructionChange,
   newsTopic,
@@ -148,14 +185,51 @@ export const RunSetupPanel = ({
         </div>
 
         <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Aspect Ratio</label>
+          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Image Aspect Ratio</label>
           <SegmentedControl options={aspectRatioOptions} value={aspectRatio} onChange={onAspectRatioChange} label="Aspect ratio selector" />
         </div>
 
         <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Resolution</label>
+          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Image Resolution</label>
           <SegmentedControl options={imageResolutionOptions} value={imageResolution} onChange={onImageResolutionChange} label="Resolution selector" />
         </div>
+
+        {mediaMode === "image_video" ? (
+          <>
+            <div>
+              <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Video Length</label>
+              <SegmentedControl
+                options={videoDurationOptions}
+                value={videoDurationSeconds}
+                onChange={onVideoDurationSecondsChange}
+                label="Video duration selector"
+              />
+              <p className="text-[11px] text-muted mt-1.5">
+                Veo 3.1 uses 8s when reference images are included.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Video Aspect Ratio</label>
+              <SegmentedControl
+                options={videoAspectRatioOptions}
+                value={videoAspectRatio}
+                onChange={onVideoAspectRatioChange}
+                label="Video aspect ratio selector"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Video Resolution</label>
+              <SegmentedControl
+                options={videoResolutionOptions}
+                value={videoResolution}
+                onChange={onVideoResolutionChange}
+                label="Video resolution selector"
+              />
+            </div>
+          </>
+        ) : null}
 
         <TextAreaField
           id="image-style-instruction"

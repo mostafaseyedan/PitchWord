@@ -42,7 +42,7 @@ export class ImageAgentService {
   private ai = env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }) : undefined;
   private logoPartPromise: Promise<InlineImagePart | undefined> | undefined;
   private inforLogoPartPromise: Promise<InlineImagePart | undefined> | undefined;
-  private teamReferencePartsPromise: Promise<InlineImagePart[]> | undefined;
+  private teamReferencePartPromise: Promise<InlineImagePart | undefined> | undefined;
 
   async generate(runId: string, draft: ContentDraft, input: RunInput, category: Category): Promise<ImageGenerationOutput> {
     if (!this.ai) {
@@ -303,8 +303,10 @@ export class ImageAgentService {
     }
 
     if (category === "team") {
-      const teamParts = await this.getTeamReferenceParts();
-      parts.push(...teamParts);
+      const teamPart = await this.getTeamReferencePart();
+      if (teamPart) {
+        parts.push(teamPart);
+      }
     }
 
     return parts;
@@ -325,14 +327,14 @@ export class ImageAgentService {
     return this.inforLogoPartPromise;
   }
 
-  private async getTeamReferenceParts(): Promise<InlineImagePart[]> {
-    if (!this.teamReferencePartsPromise) {
-      this.teamReferencePartsPromise = this.loadTeamReferenceParts();
+  private async getTeamReferencePart(): Promise<InlineImagePart | undefined> {
+    if (!this.teamReferencePartPromise) {
+      this.teamReferencePartPromise = this.loadTeamReferencePart();
     }
-    return this.teamReferencePartsPromise;
+    return this.teamReferencePartPromise;
   }
 
-  private async loadTeamReferenceParts(): Promise<InlineImagePart[]> {
+  private async loadTeamReferencePart(): Promise<InlineImagePart | undefined> {
     try {
       const entries = await readdir(defaultTeamReferenceDir, { withFileTypes: true });
       const filenames = entries
@@ -345,18 +347,17 @@ export class ImageAgentService {
           return a.localeCompare(b);
         });
 
-      const loaded = await Promise.all(
-        filenames.map((name) =>
-          this.loadImagePart(path.join(defaultTeamReferenceDir, name), `team reference image ${name}`)
-        )
-      );
-      return loaded.filter((part): part is InlineImagePart => Boolean(part));
+      const first = filenames[0];
+      if (!first) {
+        return undefined;
+      }
+      return this.loadImagePart(path.join(defaultTeamReferenceDir, first), `team reference image ${first}`);
     } catch (error) {
       console.warn(
-        `Team reference images could not be loaded from ${defaultTeamReferenceDir}. Image generation will continue without team references.`,
+        `Team reference image could not be loaded from ${defaultTeamReferenceDir}. Image generation will continue without team reference.`,
         error
       );
-      return [];
+      return undefined;
     }
   }
 

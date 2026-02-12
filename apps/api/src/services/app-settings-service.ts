@@ -5,8 +5,7 @@ import { env } from "../config/env.js";
 import { nowIso } from "../utils/time.js";
 
 interface TeamsDefaultsState {
-  teamId: string;
-  channelId: string;
+  recipientEmails: string[];
   updatedAt: string;
 }
 
@@ -20,8 +19,7 @@ const settingsFilePath = path.resolve(
 );
 
 export interface TeamsDefaults {
-  teamId: string;
-  channelId: string;
+  recipientEmails: string[];
 }
 
 export class AppSettingsService {
@@ -29,22 +27,19 @@ export class AppSettingsService {
     const state = await this.readState();
     if (state.teamsDefaults) {
       return {
-        teamId: state.teamsDefaults.teamId,
-        channelId: state.teamsDefaults.channelId
+        recipientEmails: state.teamsDefaults.recipientEmails
       };
     }
 
     return {
-      teamId: env.TEAMS_DRAFT_TEAM_ID ?? "",
-      channelId: env.TEAMS_DRAFT_CHANNEL_ID ?? ""
+      recipientEmails: []
     };
   }
 
   async setTeamsDefaults(input: TeamsDefaults): Promise<TeamsDefaults> {
     const state = await this.readState();
     state.teamsDefaults = {
-      teamId: input.teamId,
-      channelId: input.channelId,
+      recipientEmails: input.recipientEmails,
       updatedAt: nowIso()
     };
     await this.writeState(state);
