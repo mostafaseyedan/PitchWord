@@ -1,6 +1,9 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import fastifyStatic from "@fastify/static";
 import { env } from "./config/env.js";
 import { AppEventBus } from "./events/event-bus.js";
 import { PostgresRunRepository } from "./db/postgres-run-repository.js";
@@ -39,8 +42,16 @@ const start = async (): Promise<void> => {
   const app = Fastify({ logger: { level: "warn" } });
 
   await app.register(cors, {
-    origin: [env.WEB_BASE_URL, "http://localhost:5173"],
+    origin: [env.WEB_BASE_URL, "http://localhost:5173", env.APP_BASE_URL],
     credentials: true
+  });
+
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const publicPath = path.join(__dirname, "../../web/dist");
+
+  await app.register(fastifyStatic, {
+    root: publicPath,
+    wildcard: false
   });
 
   await app.register(multipart, {
@@ -113,6 +124,19 @@ const start = async (): Promise<void> => {
   registerUploadRoutes(app, routeDeps);
   registerLogsAndAnalyticsRoutes(app, routeDeps);
   registerEventsRoute(app, routeDeps);
+
+  // Serve index.html for any route not caught by API routes (SPA support)
+  app.setNotFoundHandler((request, reply) => {
+    if (request.url.startsWith("/api")) {
+      reply.code(404).send({
+        message: `Route ${request.method}:${request.url} not found`,
+        error: "Not Found",
+        statusCode: 404
+      });
+      return;
+    }
+    return reply.sendFile("index.html");
+  });
 
   app.addHook("onClose", async () => {
     if (runRepository instanceof PostgresRunRepository) {

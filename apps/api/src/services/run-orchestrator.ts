@@ -514,36 +514,54 @@ export class RunOrchestrator {
     const categoryQuery = this.defaultGroundedQueryByCategory(run.category);
     const topic = manualIdea || selectedTopic || categoryQuery;
 
-    const summaryParts = [
-      "News discovery skipped for non-industry category.",
-      "Draft must be generated from Vertex-grounded internal datastore context.",
-      manualIdea ? `Manual idea: ${manualIdea}` : "",
-      selectedTopic ? `Selected topic hint: ${selectedTopic}` : "",
-      `Category focus: ${run.category}`
-    ].filter(Boolean);
+    const summary = manualIdea
+      ? `Write a post about: ${manualIdea}`
+      : selectedTopic
+        ? `Write a post about: ${selectedTopic}`
+        : this.defaultGroundedSummaryByCategory(run.category);
 
-    return {
-      topic,
-      summary: summaryParts.join(" ")
-    };
+    return { topic, summary };
   }
 
   private defaultGroundedQueryByCategory(category: Run["category"]): string {
     switch (category) {
       case "customer_pain_point":
-        return "Top recurring Cendien customer pain points in ITSM, Microsoft, and Infor projects";
+        return "What are the biggest IT and ERP challenges enterprise clients face when managing operations without a managed services partner?";
       case "company_update":
-        return "Cendien company updates, project wins, and delivery highlights";
+        return "What recent projects, client wins, or delivery milestones has Cendien completed in ITSM, Microsoft, or Infor?";
       case "hiring":
-        return "Cendien team growth, hiring priorities, and capability needs";
+        return "What roles is Cendien hiring for and what skills are needed for ITSM, Microsoft, and Infor consulting?";
       case "product_education":
-        return "Educational Cendien guidance on ITSM, Microsoft ecosystem, and Infor best practices";
+        return "How do enterprises improve ITSM workflows, Microsoft ecosystem adoption, or Infor ERP configuration?";
       case "infor":
-        return "Infor modernization, optimization, and integration opportunities for Cendien clients";
+        return "How are enterprises modernizing Infor ERP systems and what integration challenges do they face?";
       case "team":
-        return "Cendien team expertise, consultant profiles, and delivery capabilities";
+        return "Who are the key consultants and experts at Cendien and what delivery capabilities do they bring?";
       case "industry_news":
-        return "Recent enterprise technology news relevant to Cendien";
+        return "What recent enterprise technology developments affect ITSM, Microsoft, and Infor markets?";
+      default: {
+        const exhaustive: never = category;
+        return exhaustive;
+      }
+    }
+  }
+
+  private defaultGroundedSummaryByCategory(category: Run["category"]): string {
+    switch (category) {
+      case "customer_pain_point":
+        return "Enterprise teams struggle with skills gaps, key-person dependency, and tactical distractions that prevent strategic IT execution. Highlight a specific pain point and how managed services solve it.";
+      case "company_update":
+        return "Cendien has delivered recent project wins across ITSM, Microsoft, and Infor engagements. Highlight a specific delivery milestone, client outcome, or capability expansion.";
+      case "hiring":
+        return "Cendien is growing its team to meet demand for ITSM, Microsoft, and Infor consulting. Highlight specific roles, skills, or team culture.";
+      case "product_education":
+        return "Enterprise teams need practical guidance on ITSM best practices, Microsoft ecosystem configuration, or Infor ERP optimization. Teach one specific concept clearly.";
+      case "infor":
+        return "Organizations running Infor ERP face upgrade fatigue, integration complexity, and niche expertise gaps. Highlight a specific Infor modernization challenge and how Cendien solves it.";
+      case "team":
+        return "Cendien's consultants bring deep expertise across ITSM, Microsoft, and Infor. Spotlight a team member, skill area, or delivery capability.";
+      case "industry_news":
+        return "Recent enterprise technology developments are reshaping ITSM, Microsoft, and Infor markets.";
       default: {
         const exhaustive: never = category;
         return exhaustive;
