@@ -152,8 +152,8 @@ export interface RetryStepRequest {
 }
 
 export interface PostToTeamsRequest {
-  teamId: string;
-  channelId: string;
+  teamId?: string;
+  channelId?: string;
 }
 
 export interface AnalyticsSummary {

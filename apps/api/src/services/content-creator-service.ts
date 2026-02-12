@@ -1,6 +1,6 @@
 import type { Category, Citation, ContentDraft, Tone } from "@marketing/shared";
 import { env } from "../config/env.js";
-import { CENDIEN_CONTENT_GOAL, CENDIEN_CONTEXT } from "../agents/prompts/brand-context.js";
+import { CENDIEN_CONTENT_GOAL, CENDIEN_CONTEXT, buildPainPointContext } from "../agents/prompts/brand-context.js";
 import { categoryGuidance, tonePromptByTone } from "../agents/prompts/tone-prompts.js";
 import { buildGroundingTools, createGeminiClient } from "./gemini-grounding.js";
 import { extractGroundingCitations } from "./grounding-citations.js";
@@ -44,6 +44,8 @@ export class ContentCreatorService {
       "Do not invent sources, claims, or citations."
     ].join(" ");
 
+    const painPointContext = buildPainPointContext();
+
     const prompt = [
       "You are a B2B marketing writer for Cendien.",
       tonePromptByTone[input.tone],
@@ -53,6 +55,13 @@ export class ContentCreatorService {
       input.manualIdeaText ? `Manual user idea: ${input.manualIdeaText}` : "",
       `Grounding context: ${input.groundingSnippet}`,
       `Citations input: ${JSON.stringify(input.citations)}`,
+      "",
+      "=== Buyer Pain Points (use these to frame the post) ===",
+      "Connect the topic to one or more of these real buyer pain points. Use the buyer's own language when possible.",
+      painPointContext,
+      "",
+      "The painPoints field in the output must reference specific pain points from the list above that this post addresses.",
+      "",
       "Grounding requirement: You must use grounding tool results and prioritize those facts.",
       "Length requirement: the combined body text (hook + body + cta) must be 150-300 words. This is a LinkedIn post, not a blog article.",
       "Title requirement: include the exact word 'Cendien' in the title.",

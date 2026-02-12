@@ -16,6 +16,13 @@ const envSchema = z.object({
   GEMINI_TEXT_MODEL: z.string().default("gemini-3-flash-preview"),
   VEO_MODEL: z.string().default("veo-3.1-fast"),
   CENDIEN_LOGO_PATH: z.string().optional(),
+  MEDIA_GCS_BUCKET: z.string().default("cendien-chat-images"),
+  MEDIA_GCS_PREFIX: z.string().default("marketing-media"),
+  MEDIA_GCS_PUBLIC: z
+    .string()
+    .default("true")
+    .transform((value) => value.toLowerCase() === "true"),
+  MEDIA_GCS_SIGNED_URL_TTL_HOURS: z.coerce.number().int().positive().default(168),
 
   VERTEX_GCLOUD_PROJECT: z.string().optional(),
   VERTEX_AI_LOCATION: z.string().default("us-central1"),
@@ -27,6 +34,7 @@ const envSchema = z.object({
   MS_CLIENT_SECRET: z.string().optional(),
   TEAMS_DRAFT_TEAM_ID: z.string().optional(),
   TEAMS_DRAFT_CHANNEL_ID: z.string().optional(),
+  TEAMS_WEBHOOK_URL: z.string().url().optional(),
 
   DEFAULT_TONE: z.string().default("professional"),
   DEFAULT_CATEGORY: z.string().default("industry_news"),

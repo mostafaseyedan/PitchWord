@@ -1,7 +1,7 @@
 import type { Category, Citation, Tone } from "@marketing/shared";
 import { GoogleGenAI } from "@google/genai";
 import { env } from "../config/env.js";
-import { CENDIEN_CONTENT_GOAL, CENDIEN_CONTEXT } from "../agents/prompts/brand-context.js";
+import { CENDIEN_CONTENT_GOAL, CENDIEN_CONTEXT, buildPainPointContext } from "../agents/prompts/brand-context.js";
 
 export interface NewsResult {
   topic: string;
@@ -54,16 +54,23 @@ export class NewsHunterService {
       "Only use sources from trusted publications. Never fabricate or hallucinate sources."
     ].join(" ");
 
+    const painPointContext = buildPainPointContext();
+
     const prompt = [
       "Find one high-impact, recent news topic relevant to B2B technology and enterprise markets.",
       `Category focus: ${category}`,
       `Tone preference for downstream writing: ${tone}`,
       "The chosen topic must be clearly connectable to Cendien offerings (ITSM, Microsoft, Infor, enterprise operations).",
+      "",
+      "When selecting a topic, prioritize news that maps to these real buyer pain points:",
+      painPointContext,
+      "",
       "Prioritize credible, primary, and recent sources.",
       "Return plain text only.",
       "Format:",
       "1) First line: short topic title (max 12 words).",
       "2) Then 2-3 sentences summarizing the development and its business impact.",
+      "3) Final line: which pain point(s) from the list above this topic maps to (e.g., 'Maps to: Skills Gap, Upgrade Fatigue').",
       "Do not include links, citations, markdown, or JSON."
     ].join("\n");
 

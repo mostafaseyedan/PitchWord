@@ -1,0 +1,515 @@
+----------------------- REMOTE BUILD OUTPUT ------------------------
+starting build "de8d61b9-2d26-48fc-a6e9-2369fcecbec8"
+FETCHSOURCE
+From https://github.com/mostafaseyedan/PitchWord
+ * branch            f7a843961e0c82ef4bb211b455fe8258e2404d95 -> FETCH_HEAD
+HEAD is now at f7a8439 deploy: add start script for Cloud Run compatibility
+GitCommit:
+f7a843961e0c82ef4bb211b455fe8258e2404d95
+BUILD
+Starting Step #0 - "Buildpack"
+Step #0 - "Buildpack": Pulling image: gcr.io/k8s-skaffold/pack
+Step #0 - "Buildpack": Using default tag: latest
+Step #0 - "Buildpack": latest: Pulling from k8s-skaffold/pack
+Step #0 - "Buildpack": 396c31837116: Pulling fs layer
+Step #0 - "Buildpack": 9776b10d5c8c: Pulling fs layer
+Step #0 - "Buildpack": 52cb9ac3197f: Pulling fs layer
+Step #0 - "Buildpack": 9776b10d5c8c: Verifying Checksum
+Step #0 - "Buildpack": 9776b10d5c8c: Download complete
+Step #0 - "Buildpack": 396c31837116: Verifying Checksum
+Step #0 - "Buildpack": 396c31837116: Download complete
+Step #0 - "Buildpack": 52cb9ac3197f: Verifying Checksum
+Step #0 - "Buildpack": 52cb9ac3197f: Download complete
+Step #0 - "Buildpack": 396c31837116: Pull complete
+Step #0 - "Buildpack": 9776b10d5c8c: Pull complete
+Step #0 - "Buildpack": 52cb9ac3197f: Pull complete
+Step #0 - "Buildpack": Digest: sha256:221c0c0d9a90f46f108bb888a1da9e99c82ff631e8b1c63b0223ea951752bd53
+Step #0 - "Buildpack": Status: Downloaded newer image for gcr.io/k8s-skaffold/pack:latest
+Step #0 - "Buildpack": gcr.io/k8s-skaffold/pack:latest
+Step #0 - "Buildpack": latest: Pulling from buildpacks/builder
+Step #0 - "Buildpack": 5d1190f163bb: Already exists
+Step #0 - "Buildpack": 7720bccfebac: Already exists
+Step #0 - "Buildpack": b8c474b58cd9: Already exists
+Step #0 - "Buildpack": 182afb1fe5dc: Pulling fs layer
+Step #0 - "Buildpack": 56cfddf2c067: Pulling fs layer
+Step #0 - "Buildpack": 668270e76f80: Pulling fs layer
+Step #0 - "Buildpack": 9b7a60c8c27f: Pulling fs layer
+Step #0 - "Buildpack": 1a5c83caae06: Pulling fs layer
+Step #0 - "Buildpack": 4fd86d686c0b: Pulling fs layer
+Step #0 - "Buildpack": 6785a3067075: Pulling fs layer
+Step #0 - "Buildpack": 64cac9da7f6f: Pulling fs layer
+Step #0 - "Buildpack": 69807d2bdb94: Pulling fs layer
+Step #0 - "Buildpack": 3aa72ef1d2e8: Pulling fs layer
+Step #0 - "Buildpack": e619c8ba605c: Pulling fs layer
+Step #0 - "Buildpack": a237f1dc9463: Pulling fs layer
+Step #0 - "Buildpack": c7f9f8fb5741: Pulling fs layer
+Step #0 - "Buildpack": 1523fd457bf4: Pulling fs layer
+Step #0 - "Buildpack": b7137596968a: Pulling fs layer
+Step #0 - "Buildpack": 71623d049e73: Pulling fs layer
+Step #0 - "Buildpack": b42b362c8883: Pulling fs layer
+Step #0 - "Buildpack": 92704f37db04: Pulling fs layer
+Step #0 - "Buildpack": 268bffa31373: Pulling fs layer
+Step #0 - "Buildpack": 77dd298271af: Pulling fs layer
+Step #0 - "Buildpack": 6d8fd419246c: Pulling fs layer
+Step #0 - "Buildpack": 773df114185c: Pulling fs layer
+Step #0 - "Buildpack": 262c93e6a4cf: Pulling fs layer
+Step #0 - "Buildpack": 046364377bde: Pulling fs layer
+Step #0 - "Buildpack": 7b281d9217f3: Pulling fs layer
+Step #0 - "Buildpack": 8baed76da01b: Pulling fs layer
+Step #0 - "Buildpack": 93657a5b6bcd: Pulling fs layer
+Step #0 - "Buildpack": 1f1636e44c4e: Pulling fs layer
+Step #0 - "Buildpack": a7f390331a0e: Pulling fs layer
+Step #0 - "Buildpack": dba680694493: Pulling fs layer
+Step #0 - "Buildpack": f5916b77bb72: Pulling fs layer
+Step #0 - "Buildpack": f5c32aba9fb3: Pulling fs layer
+Step #0 - "Buildpack": a1c8e77032e1: Pulling fs layer
+Step #0 - "Buildpack": d459d306f002: Pulling fs layer
+Step #0 - "Buildpack": 5c73e0c8a3c2: Pulling fs layer
+Step #0 - "Buildpack": daeb40a425ef: Pulling fs layer
+Step #0 - "Buildpack": f10c7a38c3df: Pulling fs layer
+Step #0 - "Buildpack": 3e73331118e2: Pulling fs layer
+Step #0 - "Buildpack": 7c906705185a: Pulling fs layer
+Step #0 - "Buildpack": 5dfc4a052917: Pulling fs layer
+Step #0 - "Buildpack": c72dccfa34bf: Pulling fs layer
+Step #0 - "Buildpack": 2e55aefe5d08: Pulling fs layer
+Step #0 - "Buildpack": ca4355596573: Pulling fs layer
+Step #0 - "Buildpack": 8ef40bc9f80f: Pulling fs layer
+Step #0 - "Buildpack": 37048649a083: Pulling fs layer
+Step #0 - "Buildpack": 6c312be3e73d: Pulling fs layer
+Step #0 - "Buildpack": 2349b9b9bf18: Pulling fs layer
+Step #0 - "Buildpack": c9e1bb89f06c: Pulling fs layer
+Step #0 - "Buildpack": 9045dbf9b7c7: Pulling fs layer
+Step #0 - "Buildpack": 168ca04b0704: Pulling fs layer
+Step #0 - "Buildpack": 6a72cbdb0b28: Pulling fs layer
+Step #0 - "Buildpack": e739a4985c3a: Pulling fs layer
+Step #0 - "Buildpack": 9515736a2290: Pulling fs layer
+Step #0 - "Buildpack": ca675019edb6: Pulling fs layer
+Step #0 - "Buildpack": f72b19ac55fb: Pulling fs layer
+Step #0 - "Buildpack": 327a7c843995: Pulling fs layer
+Step #0 - "Buildpack": 8c93a4dc9691: Pulling fs layer
+Step #0 - "Buildpack": 4f4fb700ef54: Pulling fs layer
+Step #0 - "Buildpack": 6785a3067075: Waiting
+Step #0 - "Buildpack": 64cac9da7f6f: Waiting
+Step #0 - "Buildpack": 69807d2bdb94: Waiting
+Step #0 - "Buildpack": 3aa72ef1d2e8: Waiting
+Step #0 - "Buildpack": e619c8ba605c: Waiting
+Step #0 - "Buildpack": a237f1dc9463: Waiting
+Step #0 - "Buildpack": c7f9f8fb5741: Waiting
+Step #0 - "Buildpack": 1523fd457bf4: Waiting
+Step #0 - "Buildpack": b7137596968a: Waiting
+Step #0 - "Buildpack": 71623d049e73: Waiting
+Step #0 - "Buildpack": b42b362c8883: Waiting
+Step #0 - "Buildpack": 92704f37db04: Waiting
+Step #0 - "Buildpack": 268bffa31373: Waiting
+Step #0 - "Buildpack": 77dd298271af: Waiting
+Step #0 - "Buildpack": 6d8fd419246c: Waiting
+Step #0 - "Buildpack": 773df114185c: Waiting
+Step #0 - "Buildpack": 262c93e6a4cf: Waiting
+Step #0 - "Buildpack": 046364377bde: Waiting
+Step #0 - "Buildpack": 7b281d9217f3: Waiting
+Step #0 - "Buildpack": 8baed76da01b: Waiting
+Step #0 - "Buildpack": 93657a5b6bcd: Waiting
+Step #0 - "Buildpack": 1f1636e44c4e: Waiting
+Step #0 - "Buildpack": a7f390331a0e: Waiting
+Step #0 - "Buildpack": dba680694493: Waiting
+Step #0 - "Buildpack": f5916b77bb72: Waiting
+Step #0 - "Buildpack": f5c32aba9fb3: Waiting
+Step #0 - "Buildpack": a1c8e77032e1: Waiting
+Step #0 - "Buildpack": d459d306f002: Waiting
+Step #0 - "Buildpack": 5c73e0c8a3c2: Waiting
+Step #0 - "Buildpack": daeb40a425ef: Waiting
+Step #0 - "Buildpack": f10c7a38c3df: Waiting
+Step #0 - "Buildpack": 3e73331118e2: Waiting
+Step #0 - "Buildpack": 7c906705185a: Waiting
+Step #0 - "Buildpack": 5dfc4a052917: Waiting
+Step #0 - "Buildpack": c72dccfa34bf: Waiting
+Step #0 - "Buildpack": 2e55aefe5d08: Waiting
+Step #0 - "Buildpack": ca4355596573: Waiting
+Step #0 - "Buildpack": 8ef40bc9f80f: Waiting
+Step #0 - "Buildpack": 37048649a083: Waiting
+Step #0 - "Buildpack": 6c312be3e73d: Waiting
+Step #0 - "Buildpack": 2349b9b9bf18: Waiting
+Step #0 - "Buildpack": c9e1bb89f06c: Waiting
+Step #0 - "Buildpack": 9045dbf9b7c7: Waiting
+Step #0 - "Buildpack": 168ca04b0704: Waiting
+Step #0 - "Buildpack": 6a72cbdb0b28: Waiting
+Step #0 - "Buildpack": e739a4985c3a: Waiting
+Step #0 - "Buildpack": 9515736a2290: Waiting
+Step #0 - "Buildpack": ca675019edb6: Waiting
+Step #0 - "Buildpack": f72b19ac55fb: Waiting
+Step #0 - "Buildpack": 327a7c843995: Waiting
+Step #0 - "Buildpack": 8c93a4dc9691: Waiting
+Step #0 - "Buildpack": 4f4fb700ef54: Waiting
+Step #0 - "Buildpack": 182afb1fe5dc: Verifying Checksum
+Step #0 - "Buildpack": 182afb1fe5dc: Download complete
+Step #0 - "Buildpack": 668270e76f80: Verifying Checksum
+Step #0 - "Buildpack": 668270e76f80: Download complete
+Step #0 - "Buildpack": 1a5c83caae06: Verifying Checksum
+Step #0 - "Buildpack": 1a5c83caae06: Download complete
+Step #0 - "Buildpack": 4fd86d686c0b: Verifying Checksum
+Step #0 - "Buildpack": 4fd86d686c0b: Download complete
+Step #0 - "Buildpack": 9b7a60c8c27f: Verifying Checksum
+Step #0 - "Buildpack": 9b7a60c8c27f: Download complete
+Step #0 - "Buildpack": 182afb1fe5dc: Pull complete
+Step #0 - "Buildpack": 56cfddf2c067: Verifying Checksum
+Step #0 - "Buildpack": 56cfddf2c067: Download complete
+Step #0 - "Buildpack": 64cac9da7f6f: Verifying Checksum
+Step #0 - "Buildpack": 64cac9da7f6f: Download complete
+Step #0 - "Buildpack": e619c8ba605c: Verifying Checksum
+Step #0 - "Buildpack": e619c8ba605c: Download complete
+Step #0 - "Buildpack": 6785a3067075: Verifying Checksum
+Step #0 - "Buildpack": 6785a3067075: Download complete
+Step #0 - "Buildpack": 69807d2bdb94: Verifying Checksum
+Step #0 - "Buildpack": 69807d2bdb94: Download complete
+Step #0 - "Buildpack": 3aa72ef1d2e8: Verifying Checksum
+Step #0 - "Buildpack": 3aa72ef1d2e8: Download complete
+Step #0 - "Buildpack": a237f1dc9463: Verifying Checksum
+Step #0 - "Buildpack": b7137596968a: Download complete
+Step #0 - "Buildpack": c7f9f8fb5741: Verifying Checksum
+Step #0 - "Buildpack": c7f9f8fb5741: Download complete
+Step #0 - "Buildpack": b42b362c8883: Verifying Checksum
+Step #0 - "Buildpack": b42b362c8883: Download complete
+Step #0 - "Buildpack": 1523fd457bf4: Verifying Checksum
+Step #0 - "Buildpack": 1523fd457bf4: Download complete
+Step #0 - "Buildpack": 71623d049e73: Verifying Checksum
+Step #0 - "Buildpack": 71623d049e73: Download complete
+Step #0 - "Buildpack": 92704f37db04: Verifying Checksum
+Step #0 - "Buildpack": 92704f37db04: Download complete
+Step #0 - "Buildpack": 773df114185c: Verifying Checksum
+Step #0 - "Buildpack": 773df114185c: Download complete
+Step #0 - "Buildpack": 6d8fd419246c: Verifying Checksum
+Step #0 - "Buildpack": 6d8fd419246c: Download complete
+Step #0 - "Buildpack": 77dd298271af: Verifying Checksum
+Step #0 - "Buildpack": 77dd298271af: Download complete
+Step #0 - "Buildpack": 268bffa31373: Verifying Checksum
+Step #0 - "Buildpack": 268bffa31373: Download complete
+Step #0 - "Buildpack": 262c93e6a4cf: Verifying Checksum
+Step #0 - "Buildpack": 262c93e6a4cf: Download complete
+Step #0 - "Buildpack": 56cfddf2c067: Pull complete
+Step #0 - "Buildpack": 046364377bde: Download complete
+Step #0 - "Buildpack": 7b281d9217f3: Verifying Checksum
+Step #0 - "Buildpack": 7b281d9217f3: Download complete
+Step #0 - "Buildpack": 93657a5b6bcd: Verifying Checksum
+Step #0 - "Buildpack": 93657a5b6bcd: Download complete
+Step #0 - "Buildpack": 1f1636e44c4e: Verifying Checksum
+Step #0 - "Buildpack": 1f1636e44c4e: Download complete
+Step #0 - "Buildpack": a7f390331a0e: Verifying Checksum
+Step #0 - "Buildpack": a7f390331a0e: Download complete
+Step #0 - "Buildpack": 8baed76da01b: Verifying Checksum
+Step #0 - "Buildpack": 8baed76da01b: Download complete
+Step #0 - "Buildpack": 668270e76f80: Pull complete
+Step #0 - "Buildpack": dba680694493: Verifying Checksum
+Step #0 - "Buildpack": dba680694493: Download complete
+Step #0 - "Buildpack": f5916b77bb72: Verifying Checksum
+Step #0 - "Buildpack": f5916b77bb72: Download complete
+Step #0 - "Buildpack": a1c8e77032e1: Verifying Checksum
+Step #0 - "Buildpack": a1c8e77032e1: Download complete
+Step #0 - "Buildpack": f5c32aba9fb3: Verifying Checksum
+Step #0 - "Buildpack": f5c32aba9fb3: Download complete
+Step #0 - "Buildpack": d459d306f002: Verifying Checksum
+Step #0 - "Buildpack": d459d306f002: Download complete
+Step #0 - "Buildpack": 5c73e0c8a3c2: Verifying Checksum
+Step #0 - "Buildpack": 5c73e0c8a3c2: Download complete
+Step #0 - "Buildpack": daeb40a425ef: Verifying Checksum
+Step #0 - "Buildpack": daeb40a425ef: Download complete
+Step #0 - "Buildpack": 9b7a60c8c27f: Pull complete
+Step #0 - "Buildpack": 5dfc4a052917: Verifying Checksum
+Step #0 - "Buildpack": 5dfc4a052917: Download complete
+Step #0 - "Buildpack": 3e73331118e2: Verifying Checksum
+Step #0 - "Buildpack": 3e73331118e2: Download complete
+Step #0 - "Buildpack": 7c906705185a: Verifying Checksum
+Step #0 - "Buildpack": 7c906705185a: Download complete
+Step #0 - "Buildpack": f10c7a38c3df: Verifying Checksum
+Step #0 - "Buildpack": f10c7a38c3df: Download complete
+Step #0 - "Buildpack": c72dccfa34bf: Verifying Checksum
+Step #0 - "Buildpack": c72dccfa34bf: Download complete
+Step #0 - "Buildpack": 2e55aefe5d08: Verifying Checksum
+Step #0 - "Buildpack": 2e55aefe5d08: Download complete
+Step #0 - "Buildpack": ca4355596573: Verifying Checksum
+Step #0 - "Buildpack": ca4355596573: Download complete
+Step #0 - "Buildpack": 37048649a083: Verifying Checksum
+Step #0 - "Buildpack": 37048649a083: Download complete
+Step #0 - "Buildpack": 1a5c83caae06: Pull complete
+Step #0 - "Buildpack": 6c312be3e73d: Verifying Checksum
+Step #0 - "Buildpack": 6c312be3e73d: Download complete
+Step #0 - "Buildpack": 2349b9b9bf18: Verifying Checksum
+Step #0 - "Buildpack": 2349b9b9bf18: Download complete
+Step #0 - "Buildpack": 8ef40bc9f80f: Verifying Checksum
+Step #0 - "Buildpack": 8ef40bc9f80f: Download complete
+Step #0 - "Buildpack": c9e1bb89f06c: Verifying Checksum
+Step #0 - "Buildpack": c9e1bb89f06c: Download complete
+Step #0 - "Buildpack": 9045dbf9b7c7: Verifying Checksum
+Step #0 - "Buildpack": 9045dbf9b7c7: Download complete
+Step #0 - "Buildpack": 168ca04b0704: Verifying Checksum
+Step #0 - "Buildpack": 168ca04b0704: Download complete
+Step #0 - "Buildpack": 6a72cbdb0b28: Verifying Checksum
+Step #0 - "Buildpack": 6a72cbdb0b28: Download complete
+Step #0 - "Buildpack": e739a4985c3a: Verifying Checksum
+Step #0 - "Buildpack": e739a4985c3a: Download complete
+Step #0 - "Buildpack": 9515736a2290: Verifying Checksum
+Step #0 - "Buildpack": 9515736a2290: Download complete
+Step #0 - "Buildpack": ca675019edb6: Verifying Checksum
+Step #0 - "Buildpack": ca675019edb6: Download complete
+Step #0 - "Buildpack": 4fd86d686c0b: Pull complete
+Step #0 - "Buildpack": f72b19ac55fb: Download complete
+Step #0 - "Buildpack": 327a7c843995: Verifying Checksum
+Step #0 - "Buildpack": 327a7c843995: Download complete
+Step #0 - "Buildpack": 8c93a4dc9691: Verifying Checksum
+Step #0 - "Buildpack": 8c93a4dc9691: Download complete
+Step #0 - "Buildpack": 4f4fb700ef54: Download complete
+Step #0 - "Buildpack": 6785a3067075: Pull complete
+Step #0 - "Buildpack": 64cac9da7f6f: Pull complete
+Step #0 - "Buildpack": 69807d2bdb94: Pull complete
+Step #0 - "Buildpack": 3aa72ef1d2e8: Pull complete
+Step #0 - "Buildpack": e619c8ba605c: Pull complete
+Step #0 - "Buildpack": a237f1dc9463: Pull complete
+Step #0 - "Buildpack": c7f9f8fb5741: Pull complete
+Step #0 - "Buildpack": 1523fd457bf4: Pull complete
+Step #0 - "Buildpack": b7137596968a: Pull complete
+Step #0 - "Buildpack": 71623d049e73: Pull complete
+Step #0 - "Buildpack": b42b362c8883: Pull complete
+Step #0 - "Buildpack": 92704f37db04: Pull complete
+Step #0 - "Buildpack": 268bffa31373: Pull complete
+Step #0 - "Buildpack": 77dd298271af: Pull complete
+Step #0 - "Buildpack": 6d8fd419246c: Pull complete
+Step #0 - "Buildpack": 773df114185c: Pull complete
+Step #0 - "Buildpack": 262c93e6a4cf: Pull complete
+Step #0 - "Buildpack": 046364377bde: Pull complete
+Step #0 - "Buildpack": 7b281d9217f3: Pull complete
+Step #0 - "Buildpack": 8baed76da01b: Pull complete
+Step #0 - "Buildpack": 93657a5b6bcd: Pull complete
+Step #0 - "Buildpack": 1f1636e44c4e: Pull complete
+Step #0 - "Buildpack": a7f390331a0e: Pull complete
+Step #0 - "Buildpack": dba680694493: Pull complete
+Step #0 - "Buildpack": f5916b77bb72: Pull complete
+Step #0 - "Buildpack": f5c32aba9fb3: Pull complete
+Step #0 - "Buildpack": a1c8e77032e1: Pull complete
+Step #0 - "Buildpack": d459d306f002: Pull complete
+Step #0 - "Buildpack": 5c73e0c8a3c2: Pull complete
+Step #0 - "Buildpack": daeb40a425ef: Pull complete
+Step #0 - "Buildpack": f10c7a38c3df: Pull complete
+Step #0 - "Buildpack": 3e73331118e2: Pull complete
+Step #0 - "Buildpack": 7c906705185a: Pull complete
+Step #0 - "Buildpack": 5dfc4a052917: Pull complete
+Step #0 - "Buildpack": c72dccfa34bf: Pull complete
+Step #0 - "Buildpack": 2e55aefe5d08: Pull complete
+Step #0 - "Buildpack": ca4355596573: Pull complete
+Step #0 - "Buildpack": 8ef40bc9f80f: Pull complete
+Step #0 - "Buildpack": 37048649a083: Pull complete
+Step #0 - "Buildpack": 6c312be3e73d: Pull complete
+Step #0 - "Buildpack": 2349b9b9bf18: Pull complete
+Step #0 - "Buildpack": c9e1bb89f06c: Pull complete
+Step #0 - "Buildpack": 9045dbf9b7c7: Pull complete
+Step #0 - "Buildpack": 168ca04b0704: Pull complete
+Step #0 - "Buildpack": 6a72cbdb0b28: Pull complete
+Step #0 - "Buildpack": e739a4985c3a: Pull complete
+Step #0 - "Buildpack": 9515736a2290: Pull complete
+Step #0 - "Buildpack": ca675019edb6: Pull complete
+Step #0 - "Buildpack": f72b19ac55fb: Pull complete
+Step #0 - "Buildpack": 327a7c843995: Pull complete
+Step #0 - "Buildpack": 8c93a4dc9691: Pull complete
+Step #0 - "Buildpack": 4f4fb700ef54: Pull complete
+Step #0 - "Buildpack": Digest: sha256:35406b06daa1352cc78254870e31c82039718546480c68cde0470dde50fc2ba9
+Step #0 - "Buildpack": Status: Downloaded newer image for gcr.io/buildpacks/builder:latest
+Step #0 - "Buildpack": latest: Pulling from buildpacks/google-22/run
+Step #0 - "Buildpack": 5d1190f163bb: Already exists
+Step #0 - "Buildpack": 05fd732b5952: Pulling fs layer
+Step #0 - "Buildpack": b2b76106bccc: Pulling fs layer
+Step #0 - "Buildpack": 1f1e8dbb49f2: Pulling fs layer
+Step #0 - "Buildpack": 05fd732b5952: Verifying Checksum
+Step #0 - "Buildpack": 05fd732b5952: Download complete
+Step #0 - "Buildpack": 05fd732b5952: Pull complete
+Step #0 - "Buildpack": b2b76106bccc: Download complete
+Step #0 - "Buildpack": 1f1e8dbb49f2: Verifying Checksum
+Step #0 - "Buildpack": 1f1e8dbb49f2: Download complete
+Step #0 - "Buildpack": b2b76106bccc: Pull complete
+Step #0 - "Buildpack": 1f1e8dbb49f2: Pull complete
+Step #0 - "Buildpack": Digest: sha256:9260b34c5642658b9dea8e435cf5d179f8f83c6901964860018f22a545385520
+Step #0 - "Buildpack": Status: Downloaded newer image for gcr.io/buildpacks/google-22/run:latest
+Step #0 - "Buildpack": 0.20.20: Pulling from buildpacksio/lifecycle
+Step #0 - "Buildpack": fd4aa3667332: Pulling fs layer
+Step #0 - "Buildpack": bfb59b82a9b6: Pulling fs layer
+Step #0 - "Buildpack": 017886f7e176: Pulling fs layer
+Step #0 - "Buildpack": 62de241dac5f: Pulling fs layer
+Step #0 - "Buildpack": 2780920e5dbf: Pulling fs layer
+Step #0 - "Buildpack": 7c12895b777b: Pulling fs layer
+Step #0 - "Buildpack": 3214acf345c0: Pulling fs layer
+Step #0 - "Buildpack": 52630fc75a18: Pulling fs layer
+Step #0 - "Buildpack": dd64bf2dd177: Pulling fs layer
+Step #0 - "Buildpack": 4aa0ea1413d3: Pulling fs layer
+Step #0 - "Buildpack": dcaa5a89b0cc: Pulling fs layer
+Step #0 - "Buildpack": 069d1e267530: Pulling fs layer
+Step #0 - "Buildpack": ce73378113e5: Pulling fs layer
+Step #0 - "Buildpack": 3214acf345c0: Waiting
+Step #0 - "Buildpack": 52630fc75a18: Waiting
+Step #0 - "Buildpack": dd64bf2dd177: Waiting
+Step #0 - "Buildpack": 4aa0ea1413d3: Waiting
+Step #0 - "Buildpack": dcaa5a89b0cc: Waiting
+Step #0 - "Buildpack": 069d1e267530: Waiting
+Step #0 - "Buildpack": ce73378113e5: Waiting
+Step #0 - "Buildpack": 7c12895b777b: Verifying Checksum
+Step #0 - "Buildpack": 7c12895b777b: Download complete
+Step #0 - "Buildpack": 2780920e5dbf: Verifying Checksum
+Step #0 - "Buildpack": 2780920e5dbf: Download complete
+Step #0 - "Buildpack": 62de241dac5f: Verifying Checksum
+Step #0 - "Buildpack": 62de241dac5f: Download complete
+Step #0 - "Buildpack": bfb59b82a9b6: Verifying Checksum
+Step #0 - "Buildpack": bfb59b82a9b6: Download complete
+Step #0 - "Buildpack": fd4aa3667332: Verifying Checksum
+Step #0 - "Buildpack": fd4aa3667332: Download complete
+Step #0 - "Buildpack": 017886f7e176: Verifying Checksum
+Step #0 - "Buildpack": 017886f7e176: Download complete
+Step #0 - "Buildpack": fd4aa3667332: Pull complete
+Step #0 - "Buildpack": bfb59b82a9b6: Pull complete
+Step #0 - "Buildpack": 52630fc75a18: Verifying Checksum
+Step #0 - "Buildpack": 52630fc75a18: Download complete
+Step #0 - "Buildpack": 3214acf345c0: Verifying Checksum
+Step #0 - "Buildpack": 3214acf345c0: Download complete
+Step #0 - "Buildpack": 4aa0ea1413d3: Verifying Checksum
+Step #0 - "Buildpack": 4aa0ea1413d3: Download complete
+Step #0 - "Buildpack": dcaa5a89b0cc: Verifying Checksum
+Step #0 - "Buildpack": dcaa5a89b0cc: Download complete
+Step #0 - "Buildpack": dd64bf2dd177: Verifying Checksum
+Step #0 - "Buildpack": dd64bf2dd177: Download complete
+Step #0 - "Buildpack": 069d1e267530: Verifying Checksum
+Step #0 - "Buildpack": 069d1e267530: Download complete
+Step #0 - "Buildpack": 017886f7e176: Pull complete
+Step #0 - "Buildpack": 62de241dac5f: Pull complete
+Step #0 - "Buildpack": 2780920e5dbf: Pull complete
+Step #0 - "Buildpack": 7c12895b777b: Pull complete
+Step #0 - "Buildpack": ce73378113e5: Verifying Checksum
+Step #0 - "Buildpack": ce73378113e5: Download complete
+Step #0 - "Buildpack": 3214acf345c0: Pull complete
+Step #0 - "Buildpack": 52630fc75a18: Pull complete
+Step #0 - "Buildpack": dd64bf2dd177: Pull complete
+Step #0 - "Buildpack": 4aa0ea1413d3: Pull complete
+Step #0 - "Buildpack": dcaa5a89b0cc: Pull complete
+Step #0 - "Buildpack": 069d1e267530: Pull complete
+Step #0 - "Buildpack": ce73378113e5: Pull complete
+Step #0 - "Buildpack": Digest: sha256:a3cadbb9da328483cca5a4d777c3ad49df4eb144e771dd7447bb67a5976fe222
+Step #0 - "Buildpack": Status: Downloaded newer image for buildpacksio/lifecycle:0.20.20
+Step #0 - "Buildpack": ===> ANALYZING
+Step #0 - "Buildpack": [analyzer] Image with name "us-central1-docker.pkg.dev/cendien-sales-support-ai/cloud-run-source-deploy/pitchword/pitchword:f7a843961e0c82ef4bb211b455fe8258e2404d95" not found
+Step #0 - "Buildpack": ===> DETECTING
+Step #0 - "Buildpack": [detector] target distro name/version labels not found, reading /etc/os-release file
+Step #0 - "Buildpack": [detector] 3 of 5 buildpacks participating
+Step #0 - "Buildpack": [detector] google.nodejs.runtime    1.0.0
+Step #0 - "Buildpack": [detector] google.nodejs.npm        1.1.1
+Step #0 - "Buildpack": [detector] google.utils.label-image 0.0.2
+Step #0 - "Buildpack": ===> RESTORING
+Step #0 - "Buildpack": ===> BUILDING
+Step #0 - "Buildpack": [builder] target distro name/version labels not found, reading /etc/os-release file
+Step #0 - "Buildpack": [builder] === Node.js - Runtime (google.nodejs.runtime@1.0.0) ===
+Step #0 - "Buildpack": [builder] 2026/02/11 22:19:01 [DEBUG] GET https://dl.google.com/runtimes/ubuntu2204/nodejs/version.json
+Step #0 - "Buildpack": [builder] ***** CACHE MISS: "nodejs"
+Step #0 - "Buildpack": [builder] Installing Node.js v24.13.0.
+Step #0 - "Buildpack": [builder] 2026/02/11 22:19:01 [DEBUG] GET https://dl.google.com/runtimes/ubuntu2204/nodejs/nodejs-24.13.0.tar.gz
+Step #0 - "Buildpack": [builder] Installing the heapsize.sh exec.d script.
+Step #0 - "Buildpack": [builder] === Node.js - Npm (google.nodejs.npm@1.1.1) ===
+Step #0 - "Buildpack": [builder] ***** CACHE MISS: "npm_modules"
+Step #0 - "Buildpack": [builder] Installing application dependencies.
+Step #0 - "Buildpack": [builder] --------------------------------------------------------------------------------
+Step #0 - "Buildpack": [builder] Running "npm ci --quiet --no-fund --no-audit (NODE_ENV=development)"
+Step #0 - "Buildpack": [builder] npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+Step #0 - "Buildpack": [builder] npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+Step #0 - "Buildpack": [builder] npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] added 627 packages in 16s
+Step #0 - "Buildpack": [builder] npm notice
+Step #0 - "Buildpack": [builder] npm notice New minor version of npm available! 11.6.2 -> 11.10.0
+Step #0 - "Buildpack": [builder] npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.10.0
+Step #0 - "Buildpack": [builder] npm notice To update run: npm install -g npm@11.10.0
+Step #0 - "Buildpack": [builder] npm notice
+Step #0 - "Buildpack": [builder] Done "npm ci --quiet --no-fund --no-audit (NODE_ENV=development)" (16.183712222s)
+Step #0 - "Buildpack": [builder] --------------------------------------------------------------------------------
+Step #0 - "Buildpack": [builder] Running "npm run build"
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > marketing-agent-platform@0.1.0 build
+Step #0 - "Buildpack": [builder] > npm-run-all build:shared build:api build:web
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > marketing-agent-platform@0.1.0 build:shared
+Step #0 - "Buildpack": [builder] > npm --workspace @marketing/shared run build
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > @marketing/shared@0.1.0 build
+Step #0 - "Buildpack": [builder] > tsc -p tsconfig.json
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > marketing-agent-platform@0.1.0 build:api
+Step #0 - "Buildpack": [builder] > npm --workspace @marketing/api run build
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > @marketing/api@0.1.0 build
+Step #0 - "Buildpack": [builder] > tsc -p tsconfig.json
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > marketing-agent-platform@0.1.0 build:web
+Step #0 - "Buildpack": [builder] > npm --workspace @marketing/web run build
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > @marketing/web@0.1.0 build
+Step #0 - "Buildpack": [builder] > tsc -p tsconfig.json && vite build
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] src/App.tsx(13,26): error TS2307: Cannot find module './components/logs/LogsView' or its corresponding type declarations.
+Step #0 - "Buildpack": [builder] npm error Lifecycle script `build` failed with error:
+Step #0 - "Buildpack": [builder] npm error code 2
+Step #0 - "Buildpack": [builder] npm error path /workspace/apps/web
+Step #0 - "Buildpack": [builder] npm error workspace @marketing/web@0.1.0
+Step #0 - "Buildpack": [builder] npm error location /workspace/apps/web
+Step #0 - "Buildpack": [builder] npm error command failed
+Step #0 - "Buildpack": [builder] npm error command sh -c tsc -p tsconfig.json && vite build
+Step #0 - "Buildpack": [builder] ERROR: "build:web" exited with 2.
+Step #0 - "Buildpack": [builder] Done "npm run build" (11.117660347s)
+Step #0 - "Buildpack": [builder] --------------------------------------------------------------------------------
+Step #0 - "Buildpack": [builder] failed to build: (error ID: 1a2262f3):
+Step #0 - "Buildpack": [builder] > marketing-agent-platform@0.1.0 build
+Step #0 - "Buildpack": [builder] > npm-run-all build:shared build:api build:web
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > marketing-agent-platform@0.1.0 build:shared
+Step #0 - "Buildpack": [builder] > npm --workspace @marketing/shared run build
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > @marketing/shared@0.1.0 build
+Step #0 - "Buildpack": [builder] > tsc -p tsconfig.json
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > marketing-agent-platform@0.1.0 build:api
+Step #0 - "Buildpack": [builder] > npm --workspace @marketing/api run build
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > @marketing/api@0.1.0 build
+Step #0 - "Buildpack": [builder] > tsc -p tsconfig.json
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > marketing-agent-platform@0.1.0 build:web
+Step #0 - "Buildpack": [builder] > npm --workspace @marketing/web run build
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] > @marketing/web@0.1.0 build
+Step #0 - "Buildpack": [builder] > tsc -p tsconfig.json && vite build
+Step #0 - "Buildpack": [builder]
+Step #0 - "Buildpack": [builder] src/App.tsx(13,26): error TS2307: Cannot find module './components/logs/LogsView' or its corresponding type declarations.
+Step #0 - "Buildpack": [builder] npm error Lifecycle script `build` failed with error:
+Step #0 - "Buildpack": [builder] npm error code 2
+Step #0 - "Buildpack": [builder] npm error path /workspace/apps/web
+Step #0 - "Buildpack": [builder] npm error workspace @marketing/web@0.1.0
+Step #0 - "Buildpack": [builder] npm error location /workspace/apps/web
+Step #0 - "Buildpack": [builder] npm error command failed
+Step #0 - "Buildpack": [builder] npm error command sh -c tsc -p tsconfig.json && vite build
+Step #0 - "Buildpack": [builder] ERROR: "build:web" exited with 2.
+Step #0 - "Buildpack": [builder] NOTE: Running the default build script can be skipped by passing the empty environment variable "GOOGLE_NODE_RUN_SCRIPTS=" to the build
+Step #0 - "Buildpack": [builder] --------------------------------------------------------------------------------
+Step #0 - "Buildpack": [builder] Sorry your project couldn't be built.
+Step #0 - "Buildpack": [builder] Our documentation explains ways to configure Buildpacks to better recognise your project:
+Step #0 - "Buildpack": [builder]  -> https://cloud.google.com/docs/buildpacks/overview
+Step #0 - "Buildpack": [builder] If you think you've found an issue, please report it:
+Step #0 - "Buildpack": [builder]  -> https://github.com/GoogleCloudPlatform/buildpacks/issues/new
+Step #0 - "Buildpack": [builder] --------------------------------------------------------------------------------
+Step #0 - "Buildpack": [builder] ERROR: failed to build: exit status 1
+Step #0 - "Buildpack": ERROR: failed to build: executing lifecycle. This may be the result of using an untrusted builder: failed with status code: 51
+Finished Step #0 - "Buildpack"
+ERROR
+ERROR: build step 0 "gcr.io/k8s-skaffold/pack" failed: step exited with non-zero status: 1
+--------------------------------------------------------------------

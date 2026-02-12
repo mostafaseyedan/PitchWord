@@ -62,9 +62,10 @@ export class ImageAgentService {
       category === "infor"
         ? "Infor branding is allowed in this category, but keep it secondary and tasteful beside Cendien branding."
         : "Do not include Infor logo, Infor wordmark, or any third-party brand logos. Only Cendien branding is allowed.";
+    const categoryVisualStyle = this.buildCategoryVisualStyle(category, draft);
     const styleLine = userStyleOverride
-      ? `Style override from user (primary direction): ${userStyleOverride}`
-      : "Style: modern, professional, realistic lighting, enterprise aesthetic, minimal clutter.";
+      ? `Additional style override from user: ${userStyleOverride}`
+      : "";
 
     const prompt = [
       "Create an enterprise marketing visual for Cendien.",
@@ -74,6 +75,7 @@ export class ImageAgentService {
       `Body context: ${draft.body}`,
       `CTA intent: ${draft.cta}`,
       draft.painPoints.length > 0 ? `Target pain points: ${draft.painPoints.join(" | ")}` : "",
+      `Category visual style:\n${categoryVisualStyle}`,
       styleLine,
       categoryContext,
       brandGuard,
@@ -169,6 +171,95 @@ export class ImageAgentService {
         hasReferenceImages: usedReferenceImages
       }
     };
+  }
+
+  private buildCategoryVisualStyle(category: Category, draft: ContentDraft): string {
+    switch (category) {
+      case "team":
+        return [
+          "Create a single professional group photo that looks like everyone was physically together.",
+          "Scene: Modern office conference room with large windows and a city view. Natural afternoon light entering from the left.",
+          "Arrange all people around a conference table in a natural meeting pose: some sitting, one standing and presenting, casual but professional.",
+          "Match lighting direction and intensity across all faces. Keep each person’s outfit, hairstyle, and appearance exactly as in their reference photo.",
+          "Ensure shadows, reflections on the table, and perspective are consistent.",
+          "The final image should look like a real corporate photo, not a collage.",
+          "4K resolution, landscape orientation."
+        ].join("\n");
+      case "product_education":
+        return [
+          "Create a high-quality, realistic 3D render of exactly one instance of the object: [Highend AI server rack].",
+          "The object must float freely in mid-air and be gently tilted and rotated in 3D space (not front-facing).",
+          "Use a soft, minimalist dark background in a clean 1080x1080 composition.",
+          "Left Half — Full Realism",
+          "The left half of the object should appear exactly as it looks in real life — accurate materials, colors, textures, reflections, and proportions.",
+          "This half must be completely opaque with no transparency and no wireframe overlay.",
+          "No soft transition, no fading, no blending.",
+          "Right Half — Hard Cut Wireframe Interior",
+          "The right half must switch cleanly to a wireframe interior diagram.",
+          "The boundary between the two halves must be a perfectly vertical, perfectly sharp, crisp cut line, stretching straight from the top edge to the bottom edge of the object.",
+          "No diagonal edges, no curved slicing, no gradient.",
+          "The wireframe must use only two line colors:",
+          "Primary: white (approximately 80% of all lines).",
+          "Secondary: a color sampled from the dominant color of the realistic half (less than 20% of lines).",
+          "The wireframe lines must be thin, precise, aligned, and engineering-style.",
+          "Every wireframe component must perfectly match the geometry of the object.",
+          "Strict Single-Object Rule",
+          "Render only ONE object in the entire frame. Render only one physical object.",
+          "Do NOT show a second object from any angle.",
+          "Do NOT show a second object as a reflection, shadow, silhouette, outline, ghost image, or transparency.",
+          "Do NOT show a second object for comparison or display purposes.",
+          "Do NOT show both the front and the back separately.",
+          "Do NOT show an extra device behind, beside, underneath, or partially hidden.",
+          "No duplicate objects, no mirrored back-and-front pairings, no reflections showing a second object.",
+          "The object must appear alone, floating.",
+          "Pose & Lighting:",
+          "Apply a natural, subtle tilt + rotation in 3D to make it look like a floating product visualization.",
+          "Use soft, neutral global illumination and no shadows under the object.",
+          "No extra props, no text, no labels unless explicitly requested."
+        ].join("\n");
+      case "customer_pain_point":
+        return [
+          `Vintage blueprint infographic explaining this draft content: ${draft.title} | ${draft.hook} | ${draft.body}`,
+          "Technical annotations, isometric elements, sepia overlay on white, labeled arrows.",
+          "Design language should feel like an engineering incident-analysis board translated into executive storytelling.",
+          "Blend operational bottlenecks, system flow constraints, and remediation callouts into one coherent visual."
+        ].join("\n");
+      case "industry_news":
+        return [
+          "Editorial enterprise-news hero visual with cinematic realism.",
+          "Show a modern command center overlooking a skyline, with layered holographic data panels representing market movement and technology disruption.",
+          "Use strong directional lighting, high contrast, and sharp depth separation to create urgency and authority.",
+          "Composition should feel like the cover of a top-tier business technology report.",
+          "No clutter, no cartoon style, no meme aesthetics."
+        ].join("\n");
+      case "company_update":
+        return [
+          "Premium corporate announcement visual for a strategic company update.",
+          "Scene: executive briefing environment with architectural lines, polished surfaces, and subtle motion cues suggesting progress.",
+          "Include abstract motifs of transformation, delivery confidence, and cross-functional execution.",
+          "Color treatment should be clean and brand-safe, with a modern enterprise finish suitable for LinkedIn thought leadership."
+        ].join("\n");
+      case "hiring":
+        return [
+          "Create a recruiting campaign visual that feels elite, human, and aspirational.",
+          "Scene: contemporary tech office with diverse professionals collaborating around digital planning surfaces.",
+          "Emphasize growth, mentorship, and technical excellence with authentic expressions and realistic body language.",
+          "Use natural lighting and premium photography style.",
+          "No stock-photo stiffness, no exaggerated poses, no cheesy hiring tropes."
+        ].join("\n");
+      case "infor":
+        return [
+          "Create a strategic enterprise integration visual highlighting Cendien + Infor partnership value.",
+          "Scene: a high-end operations environment where business workflow, ERP orchestration, and IT service continuity are visually connected.",
+          "Use layered interface-like elements to imply planning, execution, and optimization across finance, supply chain, and service operations.",
+          "Infor presence should be secondary and tasteful, while Cendien remains the lead brand anchor.",
+          "Final image must feel boardroom-ready and implementation-focused."
+        ].join("\n");
+      default: {
+        const exhaustive: never = category;
+        return exhaustive;
+      }
+    }
   }
 
   private isGeminiModel(model: string): boolean {

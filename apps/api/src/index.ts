@@ -10,7 +10,9 @@ import { registerEventsRoute } from "./routes/events.js";
 import { registerHealthRoute } from "./routes/health.js";
 import { registerLogsAndAnalyticsRoutes } from "./routes/logs-and-analytics.js";
 import { registerRunRoutes } from "./routes/runs.js";
+import { registerSettingsRoutes } from "./routes/settings.js";
 import { registerUploadRoutes } from "./routes/uploads.js";
+import { AppSettingsService } from "./services/app-settings-service.js";
 import { ContentCreatorService } from "./services/content-creator-service.js";
 import { ImageAgentService } from "./services/image-agent-service.js";
 import { InMemoryJobQueue } from "./services/job-queue.js";
@@ -21,6 +23,7 @@ import { TeamsDeliveryService } from "./services/teams-delivery-service.js";
 import { UploadService } from "./services/upload-service.js";
 import { VertexContextService } from "./services/vertex-context-service.js";
 import { VideoAgentService } from "./services/video-agent-service.js";
+import { MediaStorageService } from "./services/media-storage-service.js";
 
 const createRepository = async (): Promise<RunRepository> => {
   if (!env.DATABASE_URL) {
@@ -60,8 +63,10 @@ const start = async (): Promise<void> => {
   const contentCreatorService = new ContentCreatorService();
   const imageAgentService = new ImageAgentService();
   const videoAgentService = new VideoAgentService();
+  const mediaStorageService = new MediaStorageService();
   const teamsDeliveryService = new TeamsDeliveryService();
   const uploadService = new UploadService();
+  const settingsService = new AppSettingsService();
 
   const orchestrator = new RunOrchestrator(
     runRepository,
@@ -71,6 +76,7 @@ const start = async (): Promise<void> => {
     contentCreatorService,
     imageAgentService,
     videoAgentService,
+    mediaStorageService,
     teamsDeliveryService
   );
 
@@ -96,12 +102,14 @@ const start = async (): Promise<void> => {
   const routeDeps = {
     runService,
     runRepository,
+    settingsService,
     uploadService,
     events
   };
 
   registerHealthRoute(app, routeDeps);
   registerRunRoutes(app, routeDeps);
+  registerSettingsRoutes(app, routeDeps);
   registerUploadRoutes(app, routeDeps);
   registerLogsAndAnalyticsRoutes(app, routeDeps);
   registerEventsRoute(app, routeDeps);

@@ -63,7 +63,7 @@ export const LiveWorkspacePanel = ({ selectedRun, onShowResult }: LiveWorkspaceP
 
           {selectedRun.newsTopic ? (
             <div className="mt-8 pt-8 border-t border-border-warm/30">
-              <div className="text-label-small mb-2 opacity-50">Industry trend</div>
+              <div className="text-label-small mb-2 opacity-50">Agenda</div>
               <h3 className="text-[18px] font-medium tracking-[-0.02em] text-primary mb-2">{selectedRun.newsTopic}</h3>
               {selectedRun.newsSummary ? (
                 <p className="text-[14px] text-secondary leading-relaxed">{selectedRun.newsSummary}</p>

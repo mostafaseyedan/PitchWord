@@ -9,6 +9,10 @@ import type {
 } from "@marketing/shared";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+export interface TeamsDefaults {
+  teamId: string;
+  channelId: string;
+}
 
 const parseJson = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
@@ -82,6 +86,22 @@ export const apiClient = {
       body: JSON.stringify(payload)
     });
     return parseJson<Run>(response);
+  },
+
+  async getTeamsDefaults(): Promise<TeamsDefaults> {
+    const response = await fetch(`${API_BASE}/api/settings/teams-defaults`);
+    return parseJson<TeamsDefaults>(response);
+  },
+
+  async setTeamsDefaults(payload: TeamsDefaults): Promise<TeamsDefaults> {
+    const response = await fetch(`${API_BASE}/api/settings/teams-defaults`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+    return parseJson<TeamsDefaults>(response);
   },
 
   async uploadFile(file: File): Promise<{ fileRef: string; originalFilename: string; sizeBytes: number }> {

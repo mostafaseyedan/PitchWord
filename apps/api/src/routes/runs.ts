@@ -30,8 +30,8 @@ const retryStepSchema = z.object({
 });
 
 const postToTeamsSchema = z.object({
-  teamId: z.string().min(1),
-  channelId: z.string().min(1)
+  teamId: z.string().optional().default(""),
+  channelId: z.string().optional().default("")
 });
 
 export const registerRunRoutes: RouteRegistrar = (app, deps) => {

@@ -32,10 +32,55 @@ function App() {
 
   const [teamId, setTeamId] = useState("");
   const [channelId, setChannelId] = useState("");
+  const [teamsDefaultsLoaded, setTeamsDefaultsLoaded] = useState(false);
 
   const [uploadedFileRefs, setUploadedFileRefs] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadTeamsDefaults = async (): Promise<void> => {
+      try {
+        const defaults = await apiClient.getTeamsDefaults();
+        if (cancelled) {
+          return;
+        }
+        setTeamId(defaults.teamId);
+        setChannelId(defaults.channelId);
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : String(loadError));
+        }
+      } finally {
+        if (!cancelled) {
+          setTeamsDefaultsLoaded(true);
+        }
+      }
+    };
+
+    void loadTeamsDefaults();
+    return () => {
+      cancelled = true;
+    };
+  }, [setError]);
+
+  useEffect(() => {
+    if (!teamsDefaultsLoaded || !teamId || !channelId) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      void apiClient.setTeamsDefaults({ teamId, channelId }).catch((saveError) => {
+        setError(saveError instanceof Error ? saveError.message : String(saveError));
+      });
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [teamsDefaultsLoaded, teamId, channelId, setError]);
 
   useEffect(() => {
     if (!selectedRunId && runs.length > 0) {
@@ -181,8 +226,8 @@ function App() {
   };
 
   const handlePostToTeams = async (): Promise<void> => {
-    if (!selectedRun || !teamId || !channelId) {
-      setError("Enter team/channel IDs before posting manually.");
+    if (!selectedRun) {
+      setError("Select a run before posting to Teams.");
       return;
     }
     try {
