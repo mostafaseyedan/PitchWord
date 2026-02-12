@@ -47,14 +47,55 @@ export class RunOrchestrator {
         run.id,
         "news_hunter",
         async () => {
-          if (run.sourceType === "manual" && run.input.manualIdeaText && !run.input.selectedNewsTopic) {
+          const selectedTopic = run.input.selectedNewsTopic?.trim();
+          const manualIdea = run.input.manualIdeaText?.trim();
+
+          if (run.category !== "industry_news") {
+            const grounded = this.buildGroundedTopicForNonNewsCategory(run);
+            return {
+              result: {
+                topic: grounded.topic,
+                summary: grounded.summary,
+                citations: [] as Citation[]
+              },
+              meta: {
+                model: "skipped",
+                prompt: "",
+                rawResponseText: undefined,
+                systemInstruction: "news_hunter skipped because category is not industry_news"
+              }
+            };
+          }
+
+          if (selectedTopic) {
+            return {
+              result: {
+                topic: selectedTopic,
+                summary: `Manual topic selected: ${selectedTopic}`,
+                citations: [] as Citation[]
+              },
+              meta: {
+                model: "none",
+                prompt: "",
+                rawResponseText: undefined,
+                systemInstruction: "news_hunter bypassed because selectedNewsTopic was provided"
+              }
+            };
+          }
+
+          if (run.sourceType === "manual" && manualIdea) {
             return {
               result: {
                 topic: "Manual idea",
-                summary: run.input.manualIdeaText,
+                summary: manualIdea,
                 citations: [] as Citation[]
               },
-              meta: { model: "none", prompt: "", rawResponseText: undefined, systemInstruction: "" }
+              meta: {
+                model: "none",
+                prompt: "",
+                rawResponseText: undefined,
+                systemInstruction: "news_hunter bypassed because manual idea was provided"
+              }
             };
           }
 
@@ -465,5 +506,48 @@ export class RunOrchestrator {
 
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private buildGroundedTopicForNonNewsCategory(run: Run): { topic: string; summary: string } {
+    const manualIdea = run.input.manualIdeaText?.trim();
+    const selectedTopic = run.input.selectedNewsTopic?.trim();
+    const categoryQuery = this.defaultGroundedQueryByCategory(run.category);
+    const topic = manualIdea || selectedTopic || categoryQuery;
+
+    const summaryParts = [
+      "News discovery skipped for non-industry category.",
+      "Draft must be generated from Vertex-grounded internal datastore context.",
+      manualIdea ? `Manual idea: ${manualIdea}` : "",
+      selectedTopic ? `Selected topic hint: ${selectedTopic}` : "",
+      `Category focus: ${run.category}`
+    ].filter(Boolean);
+
+    return {
+      topic,
+      summary: summaryParts.join(" ")
+    };
+  }
+
+  private defaultGroundedQueryByCategory(category: Run["category"]): string {
+    switch (category) {
+      case "customer_pain_point":
+        return "Top recurring Cendien customer pain points in ITSM, Microsoft, and Infor projects";
+      case "company_update":
+        return "Cendien company updates, project wins, and delivery highlights";
+      case "hiring":
+        return "Cendien team growth, hiring priorities, and capability needs";
+      case "product_education":
+        return "Educational Cendien guidance on ITSM, Microsoft ecosystem, and Infor best practices";
+      case "infor":
+        return "Infor modernization, optimization, and integration opportunities for Cendien clients";
+      case "team":
+        return "Cendien team expertise, consultant profiles, and delivery capabilities";
+      case "industry_news":
+        return "Recent enterprise technology news relevant to Cendien";
+      default: {
+        const exhaustive: never = category;
+        return exhaustive;
+      }
+    }
   }
 }

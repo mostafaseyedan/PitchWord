@@ -84,6 +84,8 @@ export class ContentCreatorService {
       }
     });
 
+    const diagnostics = this.describeGroundingDiagnostics(response);
+
     const text = this.extractText(response);
     if (!text) {
       throw new Error("Gemini returned empty response for content draft.");
@@ -94,7 +96,6 @@ export class ContentCreatorService {
       console.warn("Unparseable Gemini response for content draft. Continuing with fallback extraction.");
     }
 
-    const diagnostics = this.describeGroundingDiagnostics(response);
     const groundedCitations = extractGroundingCitations(response);
     if (groundedCitations.length === 0) {
       console.warn(
