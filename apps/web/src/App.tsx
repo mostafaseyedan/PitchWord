@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import * as Tabs from "@radix-ui/react-tabs";
 import type {
   AspectRatio,
   Category,
   ImageResolution,
+  LibraryAsset,
   ManualRunRequest,
   Tone,
   VideoAspectRatio,
@@ -13,7 +13,6 @@ import type {
 } from "@marketing/shared";
 import { apiClient } from "./api/client";
 import { useDashboardData } from "./hooks/use-dashboard-data";
-import { Sidebar, type ViewName } from "./components/layout/Sidebar";
 import { TopBar } from "./components/layout/TopNav";
 import { RunSetupPanel } from "./components/dashboard/RunSetupPanel";
 import { LiveWorkspacePanel } from "./components/dashboard/LiveWorkspacePanel";
@@ -22,12 +21,16 @@ import { HistoryList } from "./components/history/HistoryList";
 import { LogsView } from "./components/logs/LogsView";
 import { AlertBanner } from "./components/common/AlertBanner";
 import { Spinner } from "./components/common/Spinner";
+import { Button } from "./components/common/Button";
+import { GraphicGenerationPanel } from "./components/dashboard/GraphicGenerationPanel";
 import "./styles/app.css";
+
+type PaneView = "run_setup" | "graphics" | "analytics" | "publishing" | "active_stream";
 
 function App() {
   const { runs, logs, analytics, loading, error, setError } = useDashboardData();
 
-  const [activeView, setActiveView] = useState<ViewName>("dashboard");
+  const [paneView, setPaneView] = useState<PaneView>("run_setup");
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
 
   const [tone, setTone] = useState<Tone>("professional");
@@ -42,23 +45,35 @@ function App() {
   const [videoResolution, setVideoResolution] = useState<VideoResolution>("720p");
   const [imageStyleInstruction, setImageStyleInstruction] = useState("");
 
+  const [stylePresetId, setStylePresetId] = useState("editorial");
+  const [fontPresetId, setFontPresetId] = useState("modern_sans");
+  const [colorSchemeId, setColorSchemeId] = useState("executive_blue");
+
+  const [graphicPrompt, setGraphicPrompt] = useState("");
+
   const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
   const [teamsDefaultsLoaded, setTeamsDefaultsLoaded] = useState(false);
 
-  const [uploadedFileRefs, setUploadedFileRefs] = useState<string[]>([]);
+  const [libraryAssets, setLibraryAssets] = useState<LibraryAsset[]>([]);
+  const [selectedReferenceAssetIds, setSelectedReferenceAssetIds] = useState<string[]>([]);
+
   const [busy, setBusy] = useState(false);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    const loadTeamsDefaults = async (): Promise<void> => {
+    const loadBootData = async (): Promise<void> => {
       try {
-        const defaults = await apiClient.getTeamsDefaults();
+        const [defaults, assets] = await Promise.all([
+          apiClient.getTeamsDefaults(),
+          apiClient.listLibraryAssets()
+        ]);
         if (cancelled) {
           return;
         }
         setRecipientEmails(defaults.recipientEmails);
+        setLibraryAssets(assets);
       } catch (loadError) {
         if (!cancelled) {
           setError(loadError instanceof Error ? loadError.message : String(loadError));
@@ -70,7 +85,7 @@ function App() {
       }
     };
 
-    void loadTeamsDefaults();
+    void loadBootData();
     return () => {
       cancelled = true;
     };
@@ -115,47 +130,6 @@ function App() {
     }
   }, [busy, activeRunId, runs]);
 
-  useEffect(() => {
-    if (!busy || !activeRunId) {
-      return;
-    }
-
-    const terminal = ["review_ready", "posted", "failed"];
-    let cancelled = false;
-    let errorCount = 0;
-
-    const pollRun = async (): Promise<void> => {
-      try {
-        const run = await apiClient.getRun(activeRunId);
-        if (cancelled) {
-          return;
-        }
-
-        errorCount = 0;
-        if (terminal.includes(run.status)) {
-          setBusy(false);
-          setActiveRunId(null);
-        }
-      } catch {
-        errorCount += 1;
-        if (!cancelled && errorCount >= 5) {
-          setBusy(false);
-          setActiveRunId(null);
-        }
-      }
-    };
-
-    void pollRun();
-    const timer = window.setInterval(() => {
-      void pollRun();
-    }, 4000);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-    };
-  }, [busy, activeRunId]);
-
   const handleDailyRun = async (): Promise<void> => {
     try {
       setBusy(true);
@@ -166,11 +140,15 @@ function App() {
         videoDurationSeconds,
         videoAspectRatio,
         videoResolution,
-        imageStyleInstruction: imageStyleInstruction || undefined
+        imageStyleInstruction: imageStyleInstruction || undefined,
+        stylePresetId,
+        fontPresetId,
+        colorSchemeId,
+        referenceAssetIds: selectedReferenceAssetIds
       });
       setActiveRunId(run.id);
       setSelectedRunId(run.id);
-      setActiveView("dashboard");
+      setPaneView("publishing");
     } catch (runError) {
       setError(runError instanceof Error ? runError.message : String(runError));
       setBusy(false);
@@ -185,22 +163,26 @@ function App() {
       input: {
         manualIdeaText: manualIdeaText || undefined,
         selectedNewsTopic: selectedNewsTopic || undefined,
-        uploadedFileRefs,
+        uploadedFileRefs: [],
+        referenceAssetIds: selectedReferenceAssetIds,
         requestedMedia: mediaMode,
         aspectRatio,
         imageResolution,
         videoDurationSeconds,
         videoAspectRatio,
         videoResolution,
-        imageStyleInstruction: imageStyleInstruction || undefined
-      },
+        imageStyleInstruction: imageStyleInstruction || undefined,
+        stylePresetId,
+        fontPresetId,
+        colorSchemeId
+      }
     };
     try {
       setBusy(true);
       const run = await apiClient.createManualRun(payload);
       setActiveRunId(run.id);
       setSelectedRunId(run.id);
-      setActiveView("dashboard");
+      setPaneView("active_stream");
     } catch (runError) {
       setError(runError instanceof Error ? runError.message : String(runError));
       setBusy(false);
@@ -208,16 +190,19 @@ function App() {
     }
   };
 
-  const handleUpload = async (fileList: FileList | null): Promise<void> => {
+  const refreshLibraryAssets = async (): Promise<void> => {
+    const assets = await apiClient.listLibraryAssets();
+    setLibraryAssets(assets);
+  };
+
+  const handleLibraryUpload = async (fileList: FileList | null): Promise<void> => {
     if (!fileList?.length) return;
     try {
       setBusy(true);
-      const refs: string[] = [];
       for (const file of Array.from(fileList)) {
-        const uploaded = await apiClient.uploadFile(file);
-        refs.push(uploaded.fileRef);
+        await apiClient.uploadLibraryAsset(file);
       }
-      setUploadedFileRefs((current) => [...current, ...refs]);
+      await refreshLibraryAssets();
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : String(uploadError));
     } finally {
@@ -225,8 +210,38 @@ function App() {
     }
   };
 
-  const handleRemoveFile = (index: number): void => {
-    setUploadedFileRefs((current) => current.filter((_, i) => i !== index));
+  const handleGenerateGraphic = async (): Promise<void> => {
+    try {
+      setBusy(true);
+      await apiClient.generateGraphicAsset({
+        prompt: graphicPrompt,
+        aspectRatio,
+        imageResolution,
+        stylePresetId,
+        fontPresetId,
+        colorSchemeId,
+        referenceAssetIds: selectedReferenceAssetIds
+      });
+      await refreshLibraryAssets();
+      setGraphicPrompt("");
+      setPaneView("graphics");
+    } catch (graphicError) {
+      setError(graphicError instanceof Error ? graphicError.message : String(graphicError));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleToggleReferenceAsset = (assetId: string): void => {
+    setSelectedReferenceAssetIds((current) => {
+      if (current.includes(assetId)) {
+        return current.filter((id) => id !== assetId);
+      }
+      if (current.length >= 14) {
+        return current;
+      }
+      return [...current, assetId];
+    });
   };
 
   const handleRetryTeams = async (): Promise<void> => {
@@ -256,142 +271,142 @@ function App() {
     }
   };
 
+  const handleSelectRun = (runId: string): void => {
+    setSelectedRunId(runId);
+    setPaneView("publishing");
+  };
 
   return (
-    <Tabs.Root
-      value={activeView}
-      onValueChange={(value: string) => setActiveView(value as ViewName)}
-      orientation="vertical"
-      className="min-h-screen"
-    >
-      {/* Sidebar — fixed vertical nav (unchanged) */}
-      <Sidebar activeView={activeView} onNavigate={setActiveView} />
+    <main className="content-shell warm-gradient-wash relative z-[1] min-h-screen">
+      <TopBar />
 
-      {/* Content Canvas — Single integrated layout surface */}
-      <main className="content-shell warm-gradient-wash relative z-[1]">
-        <TopBar />
+      {error ? (
+        <AlertBanner type="error" onClose={() => setError(null)}>
+          {error}
+        </AlertBanner>
+      ) : null}
 
-        {/* Header */}
-        <header className="mb-8">
-          <p className="text-[15px] text-secondary tracking-[0.01em]">
-            Daily creative idea extraction, grounded content generation, media creation, and Microsoft Teams delivery.
-          </p>
-        </header>
+      {loading ? (
+        <div className="flex items-center justify-center gap-4 py-20">
+          <Spinner size="lg" />
+          <span className="text-muted">Loading dashboard state...</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <aside className="lg:col-span-4 card-elevated card-elevated-neutral rounded-[28px] p-5">
+            <div className="flex flex-wrap gap-2 mb-5">
+              <Button variant={paneView === "run_setup" ? "espresso" : "secondary"} onClick={() => setPaneView("run_setup")}>
+                Run Setup
+              </Button>
+              <Button variant={paneView === "graphics" ? "espresso" : "secondary"} onClick={() => setPaneView("graphics")}>
+                Graphic Generation
+              </Button>
+              <Button variant={paneView === "analytics" ? "espresso" : "secondary"} onClick={() => setPaneView("analytics")}>
+                Analytics
+              </Button>
+            </div>
 
-        {/* Error */}
-        {error ? (
-          <AlertBanner type="error" onClose={() => setError(null)}>
-            {error}
-          </AlertBanner>
-        ) : null}
+            <HistoryList
+              runs={runs}
+              selectedRunId={selectedRunId}
+              onSelectRun={handleSelectRun}
+            />
+          </aside>
 
-        {/* Loading */}
-        {loading ? (
-          <div className="flex items-center justify-center gap-4 py-20">
-            <Spinner size="lg" />
-            <span className="text-muted">Loading dashboard state...</span>
-          </div>
-        ) : null}
+          <section className="lg:col-span-8">
+            <motion.div
+              key={paneView}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {paneView === "run_setup" ? (
+                <RunSetupPanel
+                  tone={tone}
+                  onToneChange={setTone}
+                  category={category}
+                  onCategoryChange={setCategory}
+                  mediaMode={mediaMode}
+                  onMediaModeChange={setMediaMode}
+                  aspectRatio={aspectRatio}
+                  onAspectRatioChange={setAspectRatio}
+                  imageResolution={imageResolution}
+                  onImageResolutionChange={setImageResolution}
+                  videoDurationSeconds={videoDurationSeconds}
+                  onVideoDurationSecondsChange={setVideoDurationSeconds}
+                  videoAspectRatio={videoAspectRatio}
+                  onVideoAspectRatioChange={setVideoAspectRatio}
+                  videoResolution={videoResolution}
+                  onVideoResolutionChange={setVideoResolution}
+                  imageStyleInstruction={imageStyleInstruction}
+                  onImageStyleInstructionChange={setImageStyleInstruction}
+                  stylePresetId={stylePresetId}
+                  onStylePresetIdChange={setStylePresetId}
+                  fontPresetId={fontPresetId}
+                  onFontPresetIdChange={setFontPresetId}
+                  colorSchemeId={colorSchemeId}
+                  onColorSchemeIdChange={setColorSchemeId}
+                  newsTopic={selectedNewsTopic}
+                  onNewsTopicChange={setSelectedNewsTopic}
+                  manualIdea={manualIdeaText}
+                  onManualIdeaChange={setManualIdeaText}
+                  referenceAssets={libraryAssets}
+                  selectedReferenceAssetIds={selectedReferenceAssetIds}
+                  onToggleReferenceAsset={handleToggleReferenceAsset}
+                  onReferenceUpload={handleLibraryUpload}
+                  onStartManual={handleManualRun}
+                  onStartDaily={handleDailyRun}
+                  busy={busy}
+                />
+              ) : null}
 
-        {!loading ? (
-          <>
-            <Tabs.Content value="dashboard">
-              <motion.div
-                key="dashboard"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="bento-grid stagger-children"
-              >
-                <div className="bento-span-6">
-                  <RunSetupPanel
-                    tone={tone}
-                    onToneChange={setTone}
-                    category={category}
-                    onCategoryChange={setCategory}
-                    mediaMode={mediaMode}
-                    onMediaModeChange={setMediaMode}
-                    aspectRatio={aspectRatio}
-                    onAspectRatioChange={setAspectRatio}
-                    imageResolution={imageResolution}
-                    onImageResolutionChange={setImageResolution}
-                    videoDurationSeconds={videoDurationSeconds}
-                    onVideoDurationSecondsChange={setVideoDurationSeconds}
-                    videoAspectRatio={videoAspectRatio}
-                    onVideoAspectRatioChange={setVideoAspectRatio}
-                    videoResolution={videoResolution}
-                    onVideoResolutionChange={setVideoResolution}
-                    imageStyleInstruction={imageStyleInstruction}
-                    onImageStyleInstructionChange={setImageStyleInstruction}
-                    newsTopic={selectedNewsTopic}
-                    onNewsTopicChange={setSelectedNewsTopic}
-                    manualIdea={manualIdeaText}
-                    onManualIdeaChange={setManualIdeaText}
-                    uploadedFileRefs={uploadedFileRefs}
-                    onUpload={handleUpload}
-                    onRemoveFile={handleRemoveFile}
-                    onStartManual={handleManualRun}
-                    onStartDaily={handleDailyRun}
-                    busy={busy}
-                  />
-                </div>
-                <div className="bento-span-6">
-                  <LiveWorkspacePanel
-                    selectedRun={selectedRun}
-                    onShowResult={() => setActiveView("preview")}
-                  />
-                </div>
-              </motion.div>
-            </Tabs.Content>
+              {paneView === "graphics" ? (
+                <GraphicGenerationPanel
+                  prompt={graphicPrompt}
+                  onPromptChange={setGraphicPrompt}
+                  aspectRatio={aspectRatio}
+                  onAspectRatioChange={setAspectRatio}
+                  imageResolution={imageResolution}
+                  onImageResolutionChange={setImageResolution}
+                  stylePresetId={stylePresetId}
+                  onStylePresetIdChange={setStylePresetId}
+                  fontPresetId={fontPresetId}
+                  onFontPresetIdChange={setFontPresetId}
+                  colorSchemeId={colorSchemeId}
+                  onColorSchemeIdChange={setColorSchemeId}
+                  referenceAssets={libraryAssets}
+                  selectedReferenceAssetIds={selectedReferenceAssetIds}
+                  onToggleReferenceAsset={handleToggleReferenceAsset}
+                  onReferenceUpload={handleLibraryUpload}
+                  onGenerate={handleGenerateGraphic}
+                  busy={busy}
+                />
+              ) : null}
 
-            <Tabs.Content value="preview">
-              <motion.div
-                key="studio"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
-              >
-                {/* Master: History List */}
-                <div className="lg:col-span-4">
-                  <HistoryList
-                    runs={runs}
-                    selectedRunId={selectedRunId}
-                    onSelectRun={setSelectedRunId}
-                  />
-                </div>
+              {paneView === "analytics" ? <LogsView analytics={analytics} logs={logs} /> : null}
 
-                {/* Detail: Preview/Publishing Studio */}
-                <div className="lg:col-span-8">
-                  <PreviewDeliveryPanel
-                    selectedRun={selectedRun}
-                    recipientEmails={recipientEmails}
-                    onRecipientEmailsChange={setRecipientEmails}
-                    onPostToTeams={handlePostToTeams}
-                    onRetryTeams={handleRetryTeams}
-                    busy={busy}
-                  />
-                </div>
-              </motion.div>
-            </Tabs.Content>
+              {paneView === "active_stream" ? (
+                <LiveWorkspacePanel
+                  selectedRun={selectedRun}
+                  onShowResult={() => setPaneView("publishing")}
+                />
+              ) : null}
 
-            <Tabs.Content value="logs">
-              <motion.div
-                key="logs"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <LogsView analytics={analytics} logs={logs} />
-              </motion.div>
-            </Tabs.Content>
-          </>
-        ) : null}
-      </main>
-    </Tabs.Root>
+              {paneView === "publishing" ? (
+                <PreviewDeliveryPanel
+                  selectedRun={selectedRun}
+                  recipientEmails={recipientEmails}
+                  onRecipientEmailsChange={setRecipientEmails}
+                  onPostToTeams={handlePostToTeams}
+                  onRetryTeams={handleRetryTeams}
+                  busy={busy}
+                />
+              ) : null}
+            </motion.div>
+          </section>
+        </div>
+      )}
+    </main>
   );
 }
 

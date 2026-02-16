@@ -2,6 +2,9 @@ import type {
   AgentStepLog,
   AnalyticsSummary,
   DailyRunRequest,
+  GraphicGenerateRequest,
+  GraphicGenerateResponse,
+  LibraryAsset,
   ManualRunRequest,
   Run,
   RetryStepRequest,
@@ -113,6 +116,34 @@ export const apiClient = {
     });
 
     return parseJson<{ fileRef: string; originalFilename: string; sizeBytes: number }>(response);
+  },
+
+  async listLibraryAssets(): Promise<LibraryAsset[]> {
+    const response = await fetch(`${API_BASE}/api/library/assets`);
+    return parseJson<LibraryAsset[]>(response);
+  },
+
+  async uploadLibraryAsset(file: File): Promise<LibraryAsset> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${API_BASE}/api/library/assets/upload`, {
+      method: "POST",
+      body: formData
+    });
+
+    return parseJson<LibraryAsset>(response);
+  },
+
+  async generateGraphicAsset(payload: GraphicGenerateRequest): Promise<GraphicGenerateResponse> {
+    const response = await fetch(`${API_BASE}/api/library/graphics/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+    return parseJson<GraphicGenerateResponse>(response);
   },
 
   createEventSource(): EventSource {

@@ -11,12 +11,14 @@ import { InMemoryRunRepository } from "./repositories/in-memory-run-repository.j
 import type { RunRepository } from "./repositories/run-repository.js";
 import { registerEventsRoute } from "./routes/events.js";
 import { registerHealthRoute } from "./routes/health.js";
+import { registerLibraryRoutes } from "./routes/library.js";
 import { registerLogsAndAnalyticsRoutes } from "./routes/logs-and-analytics.js";
 import { registerRunRoutes } from "./routes/runs.js";
 import { registerSettingsRoutes } from "./routes/settings.js";
 import { registerUploadRoutes } from "./routes/uploads.js";
 import { AppSettingsService } from "./services/app-settings-service.js";
 import { ContentCreatorService } from "./services/content-creator-service.js";
+import { GraphicGenerationService } from "./services/graphic-generation-service.js";
 import { ImageAgentService } from "./services/image-agent-service.js";
 import { InMemoryJobQueue } from "./services/job-queue.js";
 import { NewsHunterService } from "./services/news-hunter-service.js";
@@ -27,6 +29,7 @@ import { UploadService } from "./services/upload-service.js";
 import { VertexContextService } from "./services/vertex-context-service.js";
 import { VideoAgentService } from "./services/video-agent-service.js";
 import { MediaStorageService } from "./services/media-storage-service.js";
+import { LibraryService } from "./services/library-service.js";
 
 const createRepository = async (): Promise<RunRepository> => {
   if (!env.DATABASE_URL) {
@@ -72,9 +75,11 @@ const start = async (): Promise<void> => {
   const newsHunterService = new NewsHunterService();
   const vertexContextService = new VertexContextService();
   const contentCreatorService = new ContentCreatorService();
-  const imageAgentService = new ImageAgentService();
+  const libraryService = new LibraryService();
+  const imageAgentService = new ImageAgentService(libraryService);
   const videoAgentService = new VideoAgentService();
   const mediaStorageService = new MediaStorageService();
+  const graphicGenerationService = new GraphicGenerationService(libraryService);
   const teamsDeliveryService = new TeamsDeliveryService();
   const uploadService = new UploadService();
   const settingsService = new AppSettingsService();
@@ -115,6 +120,8 @@ const start = async (): Promise<void> => {
     runRepository,
     settingsService,
     uploadService,
+    libraryService,
+    graphicGenerationService,
     events
   };
 
@@ -122,6 +129,7 @@ const start = async (): Promise<void> => {
   registerRunRoutes(app, routeDeps);
   registerSettingsRoutes(app, routeDeps);
   registerUploadRoutes(app, routeDeps);
+  registerLibraryRoutes(app, routeDeps);
   registerLogsAndAnalyticsRoutes(app, routeDeps);
   registerEventsRoute(app, routeDeps);
 

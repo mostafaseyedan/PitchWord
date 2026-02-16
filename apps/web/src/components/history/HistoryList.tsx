@@ -17,7 +17,7 @@ export const HistoryList = ({ runs, selectedRunId, onSelectRun }: HistoryListPro
         <span className="text-label-small opacity-40">{runs.length} items</span>
       </div>
 
-      <div className="space-y-1.5 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="space-y-1.5 max-h-[700px] overflow-y-auto pr-2">
         {runs.map((run, i) => (
           <motion.div
             key={run.id}

@@ -15,7 +15,7 @@ export const TextAreaField = ({ label, helpText, onChange, id, ...rest }: TextAr
         </label>
       ) : null}
       <textarea
-        className="w-full px-5 py-3 text-[14px] font-medium leading-relaxed text-primary bg-white border border-border/60 rounded-[24px] outline-none resize-none min-h-[52px] shadow-[inset_0_2px_4px_rgba(43,36,22,0.02),0_2px_8px_rgba(43,36,22,0.02)] transition-all duration-300 focus:min-h-[120px] focus:py-4 focus:border-gold/40 focus:ring-4 focus:ring-gold/5 focus:shadow-[0_8px_24px_rgba(43,36,22,0.06)] placeholder:text-[12px] placeholder:font-light placeholder:text-muted/60"
+        className="w-full px-5 py-3 text-[14px] font-medium leading-relaxed text-primary bg-white border border-border/60 rounded-[24px] outline-none resize-none min-h-[52px] shadow-[inset_0_2px_4px_rgba(31,53,88,0.02),0_2px_8px_rgba(31,53,88,0.02)] transition-all duration-300 focus:min-h-[120px] focus:py-4 focus:border-gold/40 focus:ring-4 focus:ring-gold/5 focus:shadow-[0_8px_24px_rgba(31,53,88,0.08)] placeholder:text-[12px] placeholder:font-light placeholder:text-muted/60"
         id={id}
         onChange={(e) => onChange(e.target.value)}
         {...rest}

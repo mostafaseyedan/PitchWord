@@ -120,6 +120,7 @@ export interface TeamsDelivery {
 export interface RunInput {
   manualIdeaText?: string;
   uploadedFileRefs: string[];
+  referenceAssetIds?: string[];
   requestedMedia: "image_only" | "image_video";
   selectedNewsTopic?: string;
   aspectRatio: AspectRatio;
@@ -128,6 +129,9 @@ export interface RunInput {
   videoAspectRatio: VideoAspectRatio;
   videoResolution: VideoResolution;
   imageStyleInstruction?: string;
+  stylePresetId?: string;
+  fontPresetId?: string;
+  colorSchemeId?: string;
 }
 
 export interface Run {
@@ -163,6 +167,10 @@ export interface DailyRunRequest {
   videoAspectRatio?: VideoAspectRatio;
   videoResolution?: VideoResolution;
   imageStyleInstruction?: string;
+  stylePresetId?: string;
+  fontPresetId?: string;
+  colorSchemeId?: string;
+  referenceAssetIds?: string[];
 }
 
 export interface RetryStepRequest {
@@ -171,6 +179,32 @@ export interface RetryStepRequest {
 
 export interface PostToTeamsRequest {
   recipientEmails: string[];
+}
+
+export type LibraryAssetSource = "upload" | "graphic_generated";
+
+export interface LibraryAsset {
+  id: string;
+  uri: string;
+  title: string;
+  mimeType: string;
+  sizeBytes: number;
+  source: LibraryAssetSource;
+  createdAt: string;
+}
+
+export interface GraphicGenerateRequest {
+  prompt: string;
+  aspectRatio: AspectRatio;
+  imageResolution: ImageResolution;
+  stylePresetId?: string;
+  fontPresetId?: string;
+  colorSchemeId?: string;
+  referenceAssetIds?: string[];
+}
+
+export interface GraphicGenerateResponse {
+  asset: LibraryAsset;
 }
 
 export interface AnalyticsSummary {

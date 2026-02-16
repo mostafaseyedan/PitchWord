@@ -6,34 +6,34 @@
    ═══════════════════════════════════════════════════════ */
 @theme {
   /* Surface colors */
-  --color-page: oklch(0.99 0.005 80);
+  --color-page: oklch(0.99 0.006 245);
   --color-card: #FFFFFF;
-  --color-card-warm: oklch(0.985 0.007 80);
-  --color-card-gold: oklch(0.96 0.05 90);
+  --color-card-warm: oklch(0.985 0.01 244);
+  --color-card-gold: oklch(0.96 0.03 246);
   --color-card-sage: oklch(0.95 0.04 140);
   --color-card-blush: oklch(0.96 0.03 30);
   --color-card-sky: oklch(0.95 0.03 250);
-  --color-card-dark: #3b342b;
-  --color-espresso: #3b342b;
-  --color-sidebar: oklch(0.95 0.025 75);
-  --color-sidebar-soft: oklch(0.97 0.02 78);
-  --color-input: oklch(0.95 0.02 76);
+  --color-card-dark: #1b365d;
+  --color-espresso: #1b365d;
+  --color-sidebar: oklch(0.95 0.02 245);
+  --color-sidebar-soft: oklch(0.97 0.015 245);
+  --color-input: oklch(0.95 0.015 245);
 
-  /* Accent colors — Sunny Yellow shift */
-  --color-gold: oklch(0.89 0.18 92);
-  --color-gold-hover: oklch(0.85 0.16 90);
-  --color-gold-light: oklch(0.96 0.05 94);
+  /* Accent colors — Professional blue shift */
+  --color-gold: oklch(0.64 0.15 252);
+  --color-gold-hover: oklch(0.59 0.14 252);
+  --color-gold-light: oklch(0.92 0.04 248);
   --color-sage: oklch(0.68 0.14 140);
   --color-coral: oklch(0.65 0.16 30);
   --color-sky: oklch(0.62 0.14 250);
   --color-plum: oklch(0.56 0.14 300);
 
   /* Text colors */
-  --color-primary: #3b342b;
-  --color-secondary: #7a7c87;
+  --color-primary: #1f3558;
+  --color-secondary: #5f718e;
   --color-muted: oklch(0.68 0.01 270);
-  --color-border: oklch(0.9 0.015 75);
-  --color-border-warm: oklch(0.87 0.02 74);
+  --color-border: oklch(0.9 0.015 245);
+  --color-border-warm: oklch(0.87 0.02 245);
 
   /* Fonts */
   --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -48,11 +48,11 @@
   --radius-pill: 999px;
 
   /* Shadows */
-  --shadow-card: 0 24px 72px rgba(59, 52, 43, 0.08), 0 8px 26px rgba(59, 52, 43, 0.04);
-  --shadow-card-hover: 0 34px 88px rgba(59, 52, 43, 0.1), 0 14px 36px rgba(59, 52, 43, 0.05);
-  --shadow-float: 0 34px 96px rgba(59, 52, 43, 0.1), 0 14px 40px rgba(59, 52, 43, 0.05);
-  --shadow-gold: 0 4px 20px oklch(0.7 0.14 85 / 0.3);
-  --shadow-dock: 0 8px 32px rgba(59, 52, 43, 0.15);
+  --shadow-card: 0 24px 72px rgba(31, 53, 88, 0.1), 0 8px 26px rgba(31, 53, 88, 0.05);
+  --shadow-card-hover: 0 34px 88px rgba(31, 53, 88, 0.12), 0 14px 36px rgba(31, 53, 88, 0.06);
+  --shadow-float: 0 34px 96px rgba(31, 53, 88, 0.12), 0 14px 40px rgba(31, 53, 88, 0.06);
+  --shadow-gold: 0 4px 20px oklch(0.55 0.14 250 / 0.3);
+  --shadow-dock: 0 8px 32px rgba(31, 53, 88, 0.18);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -130,7 +130,7 @@ h3 {
 }
 
 /* ═══════════════════════════════════════════════════════
-   WARM GRADIENT WASH (Crextio-style gold bleed)
+   PROFESSIONAL GRADIENT WASH
    ═══════════════════════════════════════════════════════ */
 .warm-gradient-wash::before {
   content: "";
@@ -139,8 +139,8 @@ h3 {
   border-radius: inherit;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 45% at 25% 0%, oklch(0.86 0.12 90 / 0.12), transparent),
-    radial-gradient(ellipse 40% 30% at 75% 5%, oklch(0.86 0.12 90 / 0.05), transparent);
+    radial-gradient(ellipse 70% 45% at 25% 0%, oklch(0.74 0.12 250 / 0.12), transparent),
+    radial-gradient(ellipse 40% 30% at 75% 5%, oklch(0.74 0.12 250 / 0.05), transparent);
   z-index: 0;
 }
 
@@ -165,7 +165,7 @@ h3 {
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(16px);
-  border: 1px solid #e8dfcf;
+  border: 1px solid #d6e2f2;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 1px 2px rgba(26, 26, 46, 0.04);
   position: relative;
   overflow: hidden;
@@ -190,21 +190,21 @@ h3 {
   font-weight: 600;
   letter-spacing: 0.04em;
   border-radius: var(--radius-pill);
-  color: #7a7c87;
+  color: #5f718e;
   text-decoration: none;
   transition: all 0.25s ease;
 }
 
 .top-bar-link:hover {
-  color: #3b342b;
-  background: rgba(59, 52, 43, 0.05);
+  color: #1f3558;
+  background: rgba(31, 53, 88, 0.05);
 }
 
 .top-bar-link:hover,
 .top-bar-link.active {
-  color: #fff9ee;
-  background: #3b342b;
-  box-shadow: 0 8px 24px rgba(59, 52, 43, 0.2);
+  color: #f4f9ff;
+  background: #1f3558;
+  box-shadow: 0 8px 24px rgba(31, 53, 88, 0.2);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -213,8 +213,8 @@ h3 {
    ═══════════════════════════════════════════════════════ */
 .content-shell {
   position: relative;
-  padding-left: calc(var(--sidebar-left) + var(--sidebar-width) + 3rem);
-  padding-right: 5rem;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
   padding-top: 1.5rem;
   padding-bottom: 4rem;
   min-height: 100vh;
@@ -228,7 +228,7 @@ h3 {
 .card-elevated {
   position: relative;
   overflow: hidden;
-  border: 1px solid oklch(0.87 0.02 74 / 0.7);
+  border: 1px solid oklch(0.87 0.02 245 / 0.7);
   box-shadow: var(--shadow-card);
   container-type: inline-size;
 }
@@ -256,17 +256,17 @@ h3 {
 
 /* Color variants */
 .card-elevated-neutral {
-  background: linear-gradient(165deg, #ffffff 0%, oklch(0.99 0.005 78) 100%);
+  background: linear-gradient(165deg, #ffffff 0%, oklch(0.99 0.006 245) 100%);
 }
 
 .card-elevated-warm {
-  background: linear-gradient(165deg, #fffdfa 0%, oklch(0.985 0.01 78) 100%);
+  background: linear-gradient(165deg, #fdfefe 0%, oklch(0.985 0.01 245) 100%);
 }
 
 .card-elevated-gold {
   background:
-    radial-gradient(circle at 18% 10%, oklch(0.86 0.16 90 / 0.08), oklch(0.86 0.16 90 / 0) 42%),
-    linear-gradient(165deg, #fffefc 0%, oklch(0.99 0.02 88) 56%, oklch(0.97 0.04 90) 100%);
+    radial-gradient(circle at 18% 10%, oklch(0.72 0.12 248 / 0.08), oklch(0.72 0.12 248 / 0) 42%),
+    linear-gradient(165deg, #fcfdff 0%, oklch(0.99 0.02 245) 56%, oklch(0.97 0.03 248) 100%);
 }
 
 .card-elevated-sage {
@@ -286,7 +286,7 @@ h3 {
 }
 
 .card-elevated-page {
-  background: linear-gradient(165deg, oklch(0.96 0.02 78) 0%, oklch(0.94 0.02 78) 100%);
+  background: linear-gradient(165deg, oklch(0.96 0.015 245) 0%, oklch(0.94 0.015 245) 100%);
 }
 
 /* Dark accent card — Crextio onboarding panel style */
@@ -475,8 +475,8 @@ h3 {
   }
 
   select.native-select:focus {
-    border-color: oklch(0.86 0.16 90 / 0.4);
-    box-shadow: 0 0 0 4px oklch(0.86 0.16 90 / 0.05);
+    border-color: oklch(0.64 0.15 252 / 0.4);
+    box-shadow: 0 0 0 4px oklch(0.64 0.15 252 / 0.05);
     outline: none;
   }
 
@@ -495,7 +495,7 @@ h3 {
   }
 
   select.native-select option:checked {
-    background: oklch(0.86 0.16 90 / 0.15);
+    background: oklch(0.64 0.15 252 / 0.15);
   }
 }
 

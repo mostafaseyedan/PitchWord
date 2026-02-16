@@ -18,7 +18,11 @@ const dailySchema = z.object({
   videoDurationSeconds: z.union([z.literal(4), z.literal(6), z.literal(8)]).optional(),
   videoAspectRatio: z.enum(VIDEO_ASPECT_RATIOS).optional(),
   videoResolution: z.enum(VIDEO_RESOLUTIONS).optional(),
-  imageStyleInstruction: z.string().max(1200).optional()
+  imageStyleInstruction: z.string().max(1200).optional(),
+  stylePresetId: z.string().optional(),
+  fontPresetId: z.string().optional(),
+  colorSchemeId: z.string().optional(),
+  referenceAssetIds: z.array(z.string()).max(14).optional()
 });
 
 const manualSchema = z.object({
@@ -34,7 +38,11 @@ const manualSchema = z.object({
     videoDurationSeconds: z.union([z.literal(4), z.literal(6), z.literal(8)]).default(8),
     videoAspectRatio: z.enum(VIDEO_ASPECT_RATIOS).default("16:9"),
     videoResolution: z.enum(VIDEO_RESOLUTIONS).default("720p"),
-    imageStyleInstruction: z.string().max(1200).optional()
+    imageStyleInstruction: z.string().max(1200).optional(),
+    stylePresetId: z.string().optional(),
+    fontPresetId: z.string().optional(),
+    colorSchemeId: z.string().optional(),
+    referenceAssetIds: z.array(z.string()).max(14).optional()
   })
 });
 

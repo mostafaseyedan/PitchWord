@@ -8,8 +8,8 @@ export const TopBar = () => {
   return (
     <div className="top-bar">
       {/* Brand */}
-      <div className="flex items-center px-6 py-2 bg-white/40 border border-[#e8dfcf] rounded-pill shadow-sm">
-        <span className="text-[12px] font-bold text-[#3b342b] tracking-[0.15em]">
+      <div className="flex items-center px-6 py-2 bg-white/40 border border-[#d6e2f2] rounded-pill shadow-sm">
+        <span className="text-[12px] font-bold text-primary tracking-[0.15em]">
           PitchWord
         </span>
       </div>

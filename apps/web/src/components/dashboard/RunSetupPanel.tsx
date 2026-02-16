@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import type { LibraryAsset } from "@marketing/shared";
 import type {
   AspectRatio,
   Category,
@@ -8,13 +8,14 @@ import type {
   VideoDuration,
   VideoResolution
 } from "@marketing/shared";
-import { Upload, Play, Zap } from "lucide-react";
+import { Play, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "../common/Button";
 import { SegmentedControl } from "../common/SegmentedControl";
 import { InputField } from "../common/InputField";
 import { TextAreaField } from "../common/TextAreaField";
-import { FileTag } from "../common/FileTag";
+import { ReferenceGallery } from "../common/ReferenceGallery";
+import { colorSchemeOptions, fontPresetOptions, stylePresetOptions } from "../../config/visual-presets";
 
 interface RunSetupPanelProps {
   tone: Tone;
@@ -35,13 +36,20 @@ interface RunSetupPanelProps {
   onVideoResolutionChange: (value: VideoResolution) => void;
   imageStyleInstruction: string;
   onImageStyleInstructionChange: (value: string) => void;
+  stylePresetId: string;
+  onStylePresetIdChange: (value: string) => void;
+  fontPresetId: string;
+  onFontPresetIdChange: (value: string) => void;
+  colorSchemeId: string;
+  onColorSchemeIdChange: (value: string) => void;
   newsTopic: string;
   onNewsTopicChange: (value: string) => void;
   manualIdea: string;
   onManualIdeaChange: (value: string) => void;
-  uploadedFileRefs: string[];
-  onUpload: (files: FileList | null) => void;
-  onRemoveFile: (index: number) => void;
+  referenceAssets: LibraryAsset[];
+  selectedReferenceAssetIds: string[];
+  onToggleReferenceAsset: (assetId: string) => void;
+  onReferenceUpload: (files: FileList | null) => void;
   onStartManual: () => void;
   onStartDaily: () => void;
   busy: boolean;
@@ -126,19 +134,24 @@ export const RunSetupPanel = ({
   onVideoResolutionChange,
   imageStyleInstruction,
   onImageStyleInstructionChange,
+  stylePresetId,
+  onStylePresetIdChange,
+  fontPresetId,
+  onFontPresetIdChange,
+  colorSchemeId,
+  onColorSchemeIdChange,
   newsTopic,
   onNewsTopicChange,
   manualIdea,
   onManualIdeaChange,
-  uploadedFileRefs,
-  onUpload,
-  onRemoveFile,
+  referenceAssets,
+  selectedReferenceAssetIds,
+  onToggleReferenceAsset,
+  onReferenceUpload,
   onStartManual,
   onStartDaily,
   busy,
 }: RunSetupPanelProps) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -178,6 +191,36 @@ export const RunSetupPanel = ({
           placeholder="Type manual idea to skip news selection..."
           helpText="If provided, this is used as primary content input."
         />
+
+        <div>
+          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Style Preset</label>
+          <SegmentedControl
+            options={stylePresetOptions.map((item) => ({ value: item.id, label: item.label }))}
+            value={stylePresetId}
+            onChange={onStylePresetIdChange}
+            label="Style preset selector"
+          />
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Font Preset</label>
+          <SegmentedControl
+            options={fontPresetOptions.map((item) => ({ value: item.id, label: item.label }))}
+            value={fontPresetId}
+            onChange={onFontPresetIdChange}
+            label="Font preset selector"
+          />
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Color Scheme</label>
+          <SegmentedControl
+            options={colorSchemeOptions.map((item) => ({ value: item.id, label: item.label }))}
+            value={colorSchemeId}
+            onChange={onColorSchemeIdChange}
+            label="Color scheme selector"
+          />
+        </div>
 
         <div>
           <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Media Mode</label>
@@ -240,33 +283,14 @@ export const RunSetupPanel = ({
           helpText="Overrides the default visual style instruction for the image model."
         />
 
-        <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">File Upload</label>
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            onChange={(e) => onUpload(e.target.files)}
-            className="file-input-hidden"
-          />
-          <motion.button
-            whileHover={{ scale: 1.002 }}
-            whileTap={{ scale: 0.998 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-3 w-full px-5 py-4 rounded-2xl border-2 border-dashed border-border-warm bg-card/60 text-secondary text-[13px] font-medium hover:border-gold hover:bg-card transition-all duration-200 cursor-pointer"
-          >
-            <Upload size={18} strokeWidth={1.6} className="text-gold" />
-            <span>Click to upload files</span>
-          </motion.button>
-          {uploadedFileRefs.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5 mt-3">
-              {uploadedFileRefs.map((ref, i) => (
-                <FileTag key={ref} name={ref} onRemove={() => onRemoveFile(i)} />
-              ))}
-            </div>
-          ) : null}
-        </div>
+        <ReferenceGallery
+          assets={referenceAssets}
+          selectedIds={selectedReferenceAssetIds}
+          onToggle={onToggleReferenceAsset}
+          onUpload={onReferenceUpload}
+          busy={busy}
+          maxSelectable={14}
+        />
 
         <div className="flex gap-3 pt-3">
           <Button variant="espresso" loading={busy} onClick={onStartManual}>

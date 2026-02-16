@@ -54,14 +54,14 @@ function RecipientTagInput({
           return (
             <span
               key={email}
-              className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-[#3b342b]/8 text-[13px] font-medium text-primary border border-[#3b342b]/10"
+              className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-primary/8 text-[13px] font-medium text-primary border border-primary/10"
             >
               <Mail size={12} className="text-secondary/50 shrink-0" />
               <span>{username}<span className="text-secondary/40">{EMAIL_DOMAIN}</span></span>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); removeRecipient(email); }}
-                className="ml-0.5 p-0.5 rounded hover:bg-[#3b342b]/10 transition-colors"
+                className="ml-0.5 p-0.5 rounded hover:bg-primary/10 transition-colors"
               >
                 <X size={12} className="text-secondary/60" />
               </button>
@@ -183,12 +183,12 @@ export const PreviewDeliveryPanel = ({
                   </div>
 
                   <div className="flex justify-center mt-4">
-                    <div className="flex bg-white/72 backdrop-blur-md rounded-full p-1 border border-[#e8dfcf] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(26,26,46,0.04)]">
+                    <div className="flex bg-white/72 backdrop-blur-md rounded-full p-1 border border-[#d6e2f2] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(26,26,46,0.04)]">
                       <Tooltip.Root>
                         <Tooltip.Trigger asChild>
                           <button
                             onClick={() => handleCopy(asset.uri, asset.id)}
-                            className="relative px-5 py-2 text-[12px] font-semibold tracking-[0.005em] rounded-full text-[#7a7c87] hover:bg-[#3b342b] hover:text-[#fff9ee] transition-all duration-200 outline-none"
+                            className="relative px-5 py-2 text-[12px] font-semibold tracking-[0.005em] rounded-full text-secondary hover:bg-primary hover:text-white transition-all duration-200 outline-none"
                           >
                             <span>{copiedId === asset.id ? "Copied" : "Copy Link"}</span>
                           </button>
@@ -197,7 +197,7 @@ export const PreviewDeliveryPanel = ({
                           <Tooltip.Content
                             side="top"
                             sideOffset={10}
-                            className="z-[100000] rounded-xl bg-card-warm px-3 py-1.5 text-[12px] font-medium text-primary border border-border-warm shadow-[0_8px_24px_rgba(43,36,22,0.08)]"
+                            className="z-[100000] rounded-xl bg-card-warm px-3 py-1.5 text-[12px] font-medium text-primary border border-border-warm shadow-[0_8px_24px_rgba(31,53,88,0.08)]"
                           >
                             Copy public asset URL
                             <Tooltip.Arrow className="fill-card-warm" />
@@ -209,7 +209,7 @@ export const PreviewDeliveryPanel = ({
                         <Tooltip.Trigger asChild>
                           <button
                             onClick={() => handleDownload(asset.uri, `${asset.type}-${asset.id}`)}
-                            className="relative px-5 py-2 text-[12px] font-semibold tracking-[0.005em] rounded-full text-[#7a7c87] hover:bg-[#3b342b] hover:text-[#fff9ee] transition-all duration-200 outline-none"
+                            className="relative px-5 py-2 text-[12px] font-semibold tracking-[0.005em] rounded-full text-secondary hover:bg-primary hover:text-white transition-all duration-200 outline-none"
                           >
                             <span>Download</span>
                           </button>
@@ -218,7 +218,7 @@ export const PreviewDeliveryPanel = ({
                           <Tooltip.Content
                             side="top"
                             sideOffset={10}
-                            className="z-[100000] rounded-xl bg-card-warm px-3 py-1.5 text-[12px] font-medium text-primary border border-border-warm shadow-[0_8px_24px_rgba(43,36,22,0.08)]"
+                            className="z-[100000] rounded-xl bg-card-warm px-3 py-1.5 text-[12px] font-medium text-primary border border-border-warm shadow-[0_8px_24px_rgba(31,53,88,0.08)]"
                           >
                             Download high-res asset
                             <Tooltip.Arrow className="fill-card-warm" />
@@ -337,7 +337,7 @@ export const PreviewDeliveryPanel = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-12 bg-[#3b342b]/95 backdrop-blur-xl cursor-zoom-out"
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-12 bg-primary/90 backdrop-blur-xl cursor-zoom-out"
             onClick={() => setViewerAsset(null)}
           >
             <motion.div
