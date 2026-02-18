@@ -7,6 +7,7 @@ const graphicSchema = z.object({
   aspectRatio: z.enum(ASPECT_RATIOS).default("16:9"),
   imageResolution: z.enum(IMAGE_RESOLUTIONS).default("1K"),
   stylePresetId: z.string().optional(),
+  styleOverride: z.string().max(2400).optional(),
   fontPresetId: z.string().optional(),
   colorSchemeId: z.string().optional(),
   referenceAssetIds: z.array(z.string()).max(14).default([])

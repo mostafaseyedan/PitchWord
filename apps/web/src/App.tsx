@@ -46,6 +46,8 @@ function App() {
   const [imageStyleInstruction, setImageStyleInstruction] = useState("");
 
   const [stylePresetId, setStylePresetId] = useState("editorial");
+  const [graphicStylePresetId, setGraphicStylePresetId] = useState("vector_icon_system");
+  const [graphicStyleOverride, setGraphicStyleOverride] = useState("");
   const [fontPresetId, setFontPresetId] = useState("modern_sans");
   const [colorSchemeId, setColorSchemeId] = useState("executive_blue");
 
@@ -217,7 +219,8 @@ function App() {
         prompt: graphicPrompt,
         aspectRatio,
         imageResolution,
-        stylePresetId,
+        stylePresetId: graphicStylePresetId,
+        styleOverride: graphicStyleOverride.trim() || undefined,
         fontPresetId,
         colorSchemeId,
         referenceAssetIds: selectedReferenceAssetIds
@@ -277,43 +280,58 @@ function App() {
   };
 
   return (
-    <main className="content-shell warm-gradient-wash relative z-[1] min-h-screen">
+    <main className="workspace-app warm-gradient-wash relative z-[1]">
       <TopBar />
-
-      {error ? (
-        <AlertBanner type="error" onClose={() => setError(null)}>
-          {error}
-        </AlertBanner>
-      ) : null}
-
-      {loading ? (
-        <div className="flex items-center justify-center gap-4 py-20">
-          <Spinner size="lg" />
-          <span className="text-muted">Loading dashboard state...</span>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <aside className="lg:col-span-4 card-elevated card-elevated-neutral rounded-[28px] p-5">
-            <div className="flex flex-wrap gap-2 mb-5">
-              <Button variant={paneView === "run_setup" ? "espresso" : "secondary"} onClick={() => setPaneView("run_setup")}>
-                Run Setup
-              </Button>
-              <Button variant={paneView === "graphics" ? "espresso" : "secondary"} onClick={() => setPaneView("graphics")}>
-                Graphic Generation
-              </Button>
-              <Button variant={paneView === "analytics" ? "espresso" : "secondary"} onClick={() => setPaneView("analytics")}>
-                Analytics
-              </Button>
-            </div>
-
+      <div className="workspace-shell">
+        <aside className="workspace-side-rail">
+          <div className="workspace-side-actions">
+            <Button
+              variant={paneView === "run_setup" ? "espresso" : "secondary"}
+              color="primary"
+              size="small"
+              onClick={() => setPaneView("run_setup")}
+            >
+              Content Engine
+            </Button>
+            <Button
+              variant={paneView === "graphics" ? "espresso" : "secondary"}
+              color="positive"
+              size="small"
+              onClick={() => setPaneView("graphics")}
+            >
+              Graphic
+            </Button>
+            <Button
+              variant={paneView === "analytics" ? "espresso" : "secondary"}
+              color="inverted"
+              size="small"
+              onClick={() => setPaneView("analytics")}
+            >
+              Analytics
+            </Button>
+          </div>
+          <div className="workspace-side-list">
             <HistoryList
               runs={runs}
               selectedRunId={selectedRunId}
               onSelectRun={handleSelectRun}
             />
-          </aside>
+          </div>
+        </aside>
 
-          <section className="lg:col-span-8">
+        <section className="workspace-content">
+          {error ? (
+            <AlertBanner type="error" onClose={() => setError(null)}>
+              {error}
+            </AlertBanner>
+          ) : null}
+
+          {loading ? (
+            <div className="flex items-center justify-center gap-4 py-20">
+              <Spinner size="lg" />
+              <span className="text-muted">Loading dashboard state...</span>
+            </div>
+          ) : (
             <motion.div
               key={paneView}
               initial={{ opacity: 0, y: 12 }}
@@ -368,8 +386,10 @@ function App() {
                   onAspectRatioChange={setAspectRatio}
                   imageResolution={imageResolution}
                   onImageResolutionChange={setImageResolution}
-                  stylePresetId={stylePresetId}
-                  onStylePresetIdChange={setStylePresetId}
+                  stylePresetId={graphicStylePresetId}
+                  onStylePresetIdChange={setGraphicStylePresetId}
+                  styleOverride={graphicStyleOverride}
+                  onStyleOverrideChange={setGraphicStyleOverride}
                   fontPresetId={fontPresetId}
                   onFontPresetIdChange={setFontPresetId}
                   colorSchemeId={colorSchemeId}
@@ -403,9 +423,9 @@ function App() {
                 />
               ) : null}
             </motion.div>
-          </section>
-        </div>
-      )}
+          )}
+        </section>
+      </div>
     </main>
   );
 }

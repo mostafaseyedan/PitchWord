@@ -8,10 +8,11 @@ import type {
   VideoDuration,
   VideoResolution
 } from "@marketing/shared";
-import { Play, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "../common/Button";
 import { SegmentedControl } from "../common/SegmentedControl";
+import { DropdownField } from "../common/DropdownField";
+import { ColorSwatchStrip, renderFontPreviewLabel } from "../common/DropdownPreview";
 import { InputField } from "../common/InputField";
 import { TextAreaField } from "../common/TextAreaField";
 import { ReferenceGallery } from "../common/ReferenceGallery";
@@ -152,152 +153,280 @@ export const RunSetupPanel = ({
   onStartDaily,
   busy,
 }: RunSetupPanelProps) => {
+  const selectedCategory = categoryOptions.find((option) => option.value === category);
+  const sectionClassName = "rounded-[var(--border-radius-medium)] border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] p-4";
+  const stepClassName = "rounded-[var(--border-radius-medium)] border border-[color:var(--layout-border-color)] bg-[color:var(--primary-highlighted-color)] p-4";
+  const fontPresetDropdownOptions = fontPresetOptions.map((item) => ({
+    value: item.id,
+    label: item.label,
+    previewFontFamily: item.previewFontFamily,
+  }));
+  const colorSchemeDropdownOptions = colorSchemeOptions.map((item) => ({
+    value: item.id,
+    label: item.label,
+    startElement: {
+      type: "custom" as const,
+      render: () => <ColorSwatchStrip swatches={item.swatches} />,
+    },
+  }));
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className="card-elevated card-elevated-gold rounded-[34px] p-10 lg:p-12"
+      className="card-elevated card-elevated-neutral panel-surface"
     >
-      <div className="mb-8">
-        <div className="text-label mb-2">Engine Config</div>
-        <div className="mt-4 pb-4 border-b border-border-warm/30" />
+      <div className="section-header !items-start">
+        <div>
+          <div className="text-label">Engine Config</div>
+          <h2 className="heading-md mt-1 text-primary">Build and Launch a Content Run</h2>
+          <p className="body-md mt-1 max-w-2xl !text-secondary">
+            Shape your campaign strategy, visual language, and output format before starting a new pipeline run.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-[var(--border-radius-small)] border border-[color:var(--ui-border-color)] bg-[color:var(--allgrey-background-color)] px-3 py-1 text-[12px] font-medium text-secondary">
+            {mediaMode === "image_video" ? "Image + video" : "Image only"}
+          </span>
+          <span className="rounded-[var(--border-radius-small)] border border-[color:var(--ui-border-color)] bg-[color:var(--allgrey-background-color)] px-3 py-1 text-[12px] font-medium text-secondary">
+            {selectedReferenceAssetIds.length}/14 references
+          </span>
+        </div>
       </div>
 
-      <div className="space-y-5">
-        <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Tone</label>
-          <SegmentedControl options={toneOptions} value={tone} onChange={onToneChange} label="Tone selector" />
-        </div>
-
-        <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Category</label>
-          <SegmentedControl options={categoryOptions} value={category} onChange={onCategoryChange} label="Category selector" />
-        </div>
-
-        <InputField
-          id="news-topic"
-          label="Topic (optional)"
-          value={newsTopic}
-          onChange={onNewsTopicChange}
-          placeholder="e.g. AI personalization regulations"
-        />
-
-        <TextAreaField
-          id="manual-idea"
-          label="Manual Idea"
-          value={manualIdea}
-          onChange={onManualIdeaChange}
-          placeholder="Type manual idea to skip news selection..."
-          helpText="If provided, this is used as primary content input."
-        />
-
-        <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Style Preset</label>
-          <SegmentedControl
-            options={stylePresetOptions.map((item) => ({ value: item.id, label: item.label }))}
-            value={stylePresetId}
-            onChange={onStylePresetIdChange}
-            label="Style preset selector"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Font Preset</label>
-          <SegmentedControl
-            options={fontPresetOptions.map((item) => ({ value: item.id, label: item.label }))}
-            value={fontPresetId}
-            onChange={onFontPresetIdChange}
-            label="Font preset selector"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Color Scheme</label>
-          <SegmentedControl
-            options={colorSchemeOptions.map((item) => ({ value: item.id, label: item.label }))}
-            value={colorSchemeId}
-            onChange={onColorSchemeIdChange}
-            label="Color scheme selector"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Media Mode</label>
-          <SegmentedControl options={mediaModeOptions} value={mediaMode} onChange={onMediaModeChange} label="Media mode selector" />
-        </div>
-
-        <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Image Aspect Ratio</label>
-          <SegmentedControl options={aspectRatioOptions} value={aspectRatio} onChange={onAspectRatioChange} label="Aspect ratio selector" />
-        </div>
-
-        <div>
-          <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Image Resolution</label>
-          <SegmentedControl options={imageResolutionOptions} value={imageResolution} onChange={onImageResolutionChange} label="Resolution selector" />
-        </div>
-
-        {mediaMode === "image_video" ? (
-          <>
+      <div className="form-stack [&_.dropdown-field-compact]:w-full">
+        <section className={stepClassName}>
+          <div className="flex items-start gap-3">
+            <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-[12px] font-semibold text-primary">
+              1
+            </span>
             <div>
-              <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Video Length</label>
-              <SegmentedControl
-                options={videoDurationOptions}
-                value={videoDurationSeconds}
-                onChange={onVideoDurationSecondsChange}
-                label="Video duration selector"
+              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">Step 1</div>
+              <h3 className="text-[15px] font-semibold text-primary mt-0.5">Strategy and Visual Direction</h3>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(360px,1fr))]">
+            <section className={sectionClassName}>
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary">Strategy</div>
+                <p className="text-[14px] text-secondary mt-1">Pick narrative framing and the primary input source.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <DropdownField
+                id="tone-selector"
+                label="Tone"
+                options={toneOptions}
+                value={tone}
+                onChange={onToneChange}
+                ariaLabel="Tone selector"
               />
-              <p className="text-[11px] text-muted mt-1.5">
-                Veo 3.1 uses 8s when reference images are included.
+              <DropdownField
+                id="category-selector"
+                label="Category"
+                options={categoryOptions.map(({ value, label }) => ({ value, label }))}
+                value={category}
+                onChange={onCategoryChange}
+                ariaLabel="Category selector"
+              />
+            </div>
+
+            {selectedCategory ? (
+              <div className="mt-4 rounded-[var(--border-radius-small)] border border-[color:var(--layout-border-color)] bg-[color:var(--primary-highlighted-color)] px-3 py-2.5">
+                <p className="text-[13px] leading-5 text-secondary whitespace-pre-line">{selectedCategory.tooltip}</p>
+              </div>
+            ) : null}
+
+            <div className="mt-4">
+              <InputField
+                id="news-topic"
+                label="Topic (optional)"
+                value={newsTopic}
+                onChange={onNewsTopicChange}
+                placeholder="e.g. AI personalization regulations"
+              />
+            </div>
+
+            <div className="mt-4">
+              <TextAreaField
+                id="manual-idea"
+                label="Manual Idea"
+                value={manualIdea}
+                onChange={onManualIdeaChange}
+                placeholder="Type manual idea to skip news selection..."
+              />
+            </div>
+            </section>
+
+            <section className={sectionClassName}>
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary">Visual Direction</div>
+                <p className="text-[14px] text-secondary mt-1">Control look-and-feel presets and optional style override.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <DropdownField
+                id="style-preset-selector"
+                reserveLabelSpace
+                options={stylePresetOptions.map((item) => ({ value: item.id, label: item.label }))}
+                value={stylePresetId}
+                onChange={onStylePresetIdChange}
+                ariaLabel="Style preset selector"
+              />
+              <DropdownField
+                id="font-preset-selector"
+                label="Font Preset"
+                options={fontPresetDropdownOptions}
+                value={fontPresetId}
+                onChange={onFontPresetIdChange}
+                ariaLabel="Font preset selector"
+                optionRenderer={renderFontPreviewLabel}
+                valueRenderer={renderFontPreviewLabel}
+              />
+              <DropdownField
+                id="color-scheme-selector"
+                label="Color Scheme"
+                options={colorSchemeDropdownOptions}
+                value={colorSchemeId}
+                onChange={onColorSchemeIdChange}
+                ariaLabel="Color scheme selector"
+              />
+            </div>
+
+            <div className="mt-4">
+              <TextAreaField
+                id="image-style-instruction"
+                label="Image Design Override (optional)"
+                value={imageStyleInstruction}
+                onChange={onImageStyleInstructionChange}
+                placeholder="e.g. clean editorial composition, warm sunset lighting, shallow depth of field, subtle geometric background..."
+              />
+            </div>
+            </section>
+          </div>
+        </section>
+
+        <section className={stepClassName}>
+          <div className="flex items-start gap-3">
+            <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-[12px] font-semibold text-primary">
+              2
+            </span>
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">Step 2</div>
+              <h3 className="text-[15px] font-semibold text-primary mt-0.5">Output and Reference Context</h3>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(360px,1fr))]">
+            <section className={sectionClassName}>
+            <div className="mb-4">
+              <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary">Output Format</div>
+              <p className="text-[14px] text-secondary mt-1">Tune delivery mode and canvas constraints.</p>
+            </div>
+
+            <div>
+              <label className="field-label">Media Mode</label>
+              <SegmentedControl
+                options={mediaModeOptions}
+                value={mediaMode}
+                onChange={onMediaModeChange}
+                label="Media mode selector"
+              />
+            </div>
+
+            <div className="grid gap-4 mt-4 md:grid-cols-2">
+              <DropdownField
+                id="image-aspect-ratio-selector"
+                label="Image Aspect Ratio"
+                options={aspectRatioOptions}
+                value={aspectRatio}
+                onChange={onAspectRatioChange}
+                ariaLabel="Aspect ratio selector"
+              />
+
+              <div>
+                <label className="field-label">Image Resolution</label>
+                <SegmentedControl
+                  options={imageResolutionOptions}
+                  value={imageResolution}
+                  onChange={onImageResolutionChange}
+                  label="Resolution selector"
+                />
+              </div>
+            </div>
+
+            {mediaMode === "image_video" ? (
+              <div className="mt-4 rounded-[var(--border-radius-small)] border border-[color:var(--layout-border-color)] bg-[color:var(--allgrey-background-color)] px-3 py-3">
+                <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary mb-3">Video Settings</div>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div>
+                    <label className="field-label">Video Length</label>
+                    <SegmentedControl
+                      options={videoDurationOptions}
+                      value={videoDurationSeconds}
+                      onChange={onVideoDurationSecondsChange}
+                      label="Video duration selector"
+                    />
+                    <p className="text-[12px] text-secondary mt-1.5">
+                      Veo 3.1 uses 8s when reference images are included.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="field-label">Video Aspect Ratio</label>
+                    <SegmentedControl
+                      options={videoAspectRatioOptions}
+                      value={videoAspectRatio}
+                      onChange={onVideoAspectRatioChange}
+                      label="Video aspect ratio selector"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="field-label">Video Resolution</label>
+                    <SegmentedControl
+                      options={videoResolutionOptions}
+                      value={videoResolution}
+                      onChange={onVideoResolutionChange}
+                      label="Video resolution selector"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : null}
+            </section>
+
+            <section className={sectionClassName}>
+            <div className="mb-4">
+              <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary">Reference Context</div>
+              <p className="text-[14px] text-secondary mt-1">
+                Add visual references to align generated output with brand context.
               </p>
             </div>
+            <ReferenceGallery
+              assets={referenceAssets}
+              selectedIds={selectedReferenceAssetIds}
+              onToggle={onToggleReferenceAsset}
+              onUpload={onReferenceUpload}
+              busy={busy}
+              maxSelectable={14}
+            />
+            </section>
+          </div>
+        </section>
 
-            <div>
-              <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Video Aspect Ratio</label>
-              <SegmentedControl
-                options={videoAspectRatioOptions}
-                value={videoAspectRatio}
-                onChange={onVideoAspectRatioChange}
-                label="Video aspect ratio selector"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[12px] font-medium tracking-[0.01em] text-secondary mb-2">Video Resolution</label>
-              <SegmentedControl
-                options={videoResolutionOptions}
-                value={videoResolution}
-                onChange={onVideoResolutionChange}
-                label="Video resolution selector"
-              />
-            </div>
-          </>
-        ) : null}
-
-        <TextAreaField
-          id="image-style-instruction"
-          label="Image Design Override (optional)"
-          value={imageStyleInstruction}
-          onChange={onImageStyleInstructionChange}
-          placeholder="e.g. clean editorial composition, warm sunset lighting, shallow depth of field, subtle geometric background..."
-          helpText="Overrides the default visual style instruction for the image model."
-        />
-
-        <ReferenceGallery
-          assets={referenceAssets}
-          selectedIds={selectedReferenceAssetIds}
-          onToggle={onToggleReferenceAsset}
-          onUpload={onReferenceUpload}
-          busy={busy}
-          maxSelectable={14}
-        />
-
-        <div className="flex gap-3 pt-3">
-          <Button variant="espresso" loading={busy} onClick={onStartManual}>
-            <Play size={14} /> Start manual run
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+          <Button variant="espresso" loading={busy} onClick={onStartManual} className="w-full sm:w-auto">
+            Start manual run
           </Button>
-          <Button variant="secondary" loading={busy} onClick={onStartDaily}>
-            <Zap size={14} /> Daily run
+          <Button variant="secondary" loading={busy} onClick={onStartDaily} className="w-full sm:w-auto">
+            Daily run
           </Button>
         </div>
       </div>

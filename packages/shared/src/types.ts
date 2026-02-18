@@ -198,6 +198,7 @@ export interface GraphicGenerateRequest {
   aspectRatio: AspectRatio;
   imageResolution: ImageResolution;
   stylePresetId?: string;
+  styleOverride?: string;
   fontPresetId?: string;
   colorSchemeId?: string;
   referenceAssetIds?: string[];

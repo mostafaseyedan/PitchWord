@@ -17,9 +17,9 @@ export const LiveWorkspacePanel = ({ selectedRun, onShowResult }: LiveWorkspaceP
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
-      className="card-elevated card-elevated-neutral rounded-[32px] p-8 h-full"
+      className="card-elevated card-elevated-neutral panel-surface h-full"
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="section-header">
         <div className="text-label">Active Stream</div>
         <AnimatePresence>
           {(selectedRun?.status === "review_ready" || selectedRun?.status === "posted") && (
@@ -64,9 +64,9 @@ export const LiveWorkspacePanel = ({ selectedRun, onShowResult }: LiveWorkspaceP
           {selectedRun.newsTopic ? (
             <div className="mt-8 pt-8 border-t border-border-warm/30">
               <div className="text-label-small mb-2 opacity-50">Agenda</div>
-              <h3 className="text-[18px] font-medium tracking-[-0.02em] text-primary mb-2">{selectedRun.newsTopic}</h3>
+              <h3 className="heading-md text-primary mb-2">{selectedRun.newsTopic}</h3>
               {selectedRun.newsSummary ? (
-                <p className="text-[14px] text-secondary leading-relaxed">{selectedRun.newsSummary}</p>
+                <p className="body-md">{selectedRun.newsSummary}</p>
               ) : null}
             </div>
           ) : null}
@@ -74,9 +74,9 @@ export const LiveWorkspacePanel = ({ selectedRun, onShowResult }: LiveWorkspaceP
           {selectedRun.draft ? (
             <div className="mt-8 pt-8 border-t border-border-warm/30">
               <div className="text-label-small mb-3 opacity-50">Content Draft</div>
-              <h3 className="text-[22px] font-medium tracking-[-0.03em] text-primary mb-3">{selectedRun.draft.title}</h3>
+              <h3 className="heading-lg text-primary mb-3">{selectedRun.draft.title}</h3>
               <p className="text-[14px] font-medium text-primary mb-3">{selectedRun.draft.hook}</p>
-              <p className="text-[13px] text-secondary leading-relaxed mb-4">{selectedRun.draft.body}</p>
+              <p className="body-md mb-4">{selectedRun.draft.body}</p>
               <div className="flex gap-2 text-[12px] text-secondary mb-4">
                 <span className="font-bold text-primary opacity-60">CTA:</span> {selectedRun.draft.cta}
               </div>

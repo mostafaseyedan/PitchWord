@@ -2,7 +2,7 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import type { AspectRatio, GraphicGenerateRequest, ImageResolution, LibraryAsset } from "@marketing/shared";
 import { env } from "../config/env.js";
 import { LibraryService } from "./library-service.js";
-import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, STYLE_PRESETS } from "./visual-presets.js";
+import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, GRAPHIC_STYLE_PRESETS } from "./visual-presets.js";
 
 export class GraphicGenerationService {
   private ai = env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }) : undefined;
@@ -16,14 +16,17 @@ export class GraphicGenerationService {
 
     const maxReferences = 14;
     const referenceParts = await this.libraryService.getReferenceParts(payload.referenceAssetIds ?? [], maxReferences);
-    const styleHint = getPresetHint(STYLE_PRESETS, payload.stylePresetId);
+    const styleHint = getPresetHint(GRAPHIC_STYLE_PRESETS, payload.stylePresetId);
+    const styleOverride = payload.styleOverride?.trim();
     const fontHint = getPresetHint(FONT_PRESETS, payload.fontPresetId);
     const colorHint = getPresetHint(COLOR_SCHEMES, payload.colorSchemeId);
 
     const prompt = [
       "Create a professional graphic asset for Cendien.",
       payload.prompt,
-      styleHint ? `Style preset: ${styleHint}` : "",
+      styleHint ? `Style preset baseline: ${styleHint}` : "",
+      styleOverride ? `Style override (priority): ${styleOverride}` : "",
+      styleOverride ? "If style override conflicts with style preset baseline, prioritize the style override." : "",
       fontHint ? `Font preset: ${fontHint}` : "",
       colorHint ? `Color scheme preset: ${colorHint}` : "",
       "No logos other than Cendien-compatible enterprise styling.",

@@ -10,17 +10,17 @@ export const TextAreaField = ({ label, helpText, onChange, id, ...rest }: TextAr
   return (
     <div className="flex flex-col gap-1.5">
       {label ? (
-        <label className="text-[12px] font-medium tracking-[0.01em] text-secondary" htmlFor={id}>
+        <label className="field-label !mb-0" htmlFor={id}>
           {label}
         </label>
       ) : null}
       <textarea
-        className="w-full px-5 py-3 text-[14px] font-medium leading-relaxed text-primary bg-white border border-border/60 rounded-[24px] outline-none resize-none min-h-[52px] shadow-[inset_0_2px_4px_rgba(31,53,88,0.02),0_2px_8px_rgba(31,53,88,0.02)] transition-all duration-300 focus:min-h-[120px] focus:py-4 focus:border-gold/40 focus:ring-4 focus:ring-gold/5 focus:shadow-[0_8px_24px_rgba(31,53,88,0.08)] placeholder:text-[12px] placeholder:font-light placeholder:text-muted/60"
+        className="w-full min-h-[96px] px-4 py-2 text-[14px] font-normal leading-5 text-[color:var(--primary-text-color)] bg-[color:var(--secondary-background-color)] border border-[color:var(--ui-border-color)] rounded-[var(--border-radius-small)] outline-none resize-y transition-colors duration-150 hover:border-[color:var(--primary-text-color)] focus:border-[color:var(--primary-color)] placeholder:text-[color:var(--secondary-text-color)] placeholder:opacity-55 disabled:bg-[color:var(--disabled-background-color)] disabled:text-[color:var(--disabled-text-color)] disabled:border-transparent disabled:resize-none disabled:cursor-not-allowed read-only:bg-[color:var(--allgrey-background-color)] read-only:border-transparent read-only:resize-none read-only:cursor-default"
         id={id}
         onChange={(e) => onChange(e.target.value)}
         {...rest}
       />
-      {helpText ? <span className="text-[11px] tracking-[0.01em] text-muted">{helpText}</span> : null}
+      {helpText ? <span className="text-[12px] leading-4 text-secondary">{helpText}</span> : null}
     </div>
   );
 };

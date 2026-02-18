@@ -1,8 +1,8 @@
 import type { Run } from "@marketing/shared";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../common/Button";
-import { Download, Link as LinkIcon, Check, X, Mail } from "lucide-react";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { X, Mail } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
 const EMAIL_DOMAIN = "@cendien.com";
@@ -42,11 +42,11 @@ function RecipientTagInput({
 
   return (
     <div className="max-w-lg">
-      <label className="block text-[12px] font-semibold text-secondary/70 tracking-[0.02em] mb-1.5">
+      <label className="field-label !mb-1.5 !font-semibold !tracking-[0.02em] !text-secondary/70">
         Recipients
       </label>
       <div
-        className="flex flex-wrap items-center gap-2 min-h-[44px] px-3 py-2 rounded-xl border border-border-warm bg-white/60 focus-within:border-gold/50 focus-within:ring-2 focus-within:ring-gold/10 transition-all cursor-text"
+        className="flex flex-wrap items-center gap-2 min-h-[44px] px-3 py-2 rounded-[var(--border-radius-medium)] border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] transition-colors cursor-text focus-within:border-[color:var(--primary-color)]"
         onClick={() => inputRef.current?.focus()}
       >
         {emails.map((email) => {
@@ -54,14 +54,14 @@ function RecipientTagInput({
           return (
             <span
               key={email}
-              className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-primary/8 text-[13px] font-medium text-primary border border-primary/10"
+              className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-[var(--border-radius-small)] bg-[color:var(--primary-selected-color)] text-[13px] font-medium text-primary border border-[color:var(--primary-color)]/20"
             >
               <Mail size={12} className="text-secondary/50 shrink-0" />
               <span>{username}<span className="text-secondary/40">{EMAIL_DOMAIN}</span></span>
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); removeRecipient(email); }}
-                className="ml-0.5 p-0.5 rounded hover:bg-primary/10 transition-colors"
+                className="ml-0.5 p-0.5 rounded-[var(--border-radius-small)] hover:bg-primary/10 transition-colors"
               >
                 <X size={12} className="text-secondary/60" />
               </button>
@@ -151,20 +151,20 @@ export const PreviewDeliveryPanel = ({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
-        className="card-elevated card-elevated-neutral rounded-[32px] p-8 col-span-full"
+        className="card-elevated card-elevated-neutral panel-surface col-span-full"
       >
-        <div className="flex items-center justify-between mb-8">
+        <div className="section-header">
           <div className="text-label">Publishing Studio</div>
         </div>
 
         {assets.length > 0 || selectedRun?.draft ? (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 mb-12 items-start">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 mb-10 items-start">
             {/* Left Column: Centered Assets + CTA + Pain Points */}
             <div className="flex flex-col items-center gap-8">
               {assets.map((asset) => (
                 <div key={asset.id} className="w-full flex flex-col gap-4 group max-w-[560px]">
                   <div
-                    className="overflow-hidden transition-all duration-500 relative group cursor-zoom-in rounded-2xl"
+                    className="overflow-hidden transition-all duration-500 relative group cursor-zoom-in rounded-[var(--border-radius-medium)]"
                     onClick={() => setViewerAsset(asset)}
                   >
                     {asset.type === "image" ? (
@@ -183,21 +183,19 @@ export const PreviewDeliveryPanel = ({
                   </div>
 
                   <div className="flex justify-center mt-4">
-                    <div className="flex bg-white/72 backdrop-blur-md rounded-full p-1 border border-[#d6e2f2] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_2px_rgba(26,26,46,0.04)]">
+                    <div className="flex bg-[color:var(--secondary-background-color)] rounded-[var(--border-radius-medium)] p-1 border border-[color:var(--ui-border-color)]">
                       <Tooltip.Root>
-                        <Tooltip.Trigger asChild>
-                          <button
-                            onClick={() => handleCopy(asset.uri, asset.id)}
-                            className="relative px-5 py-2 text-[12px] font-semibold tracking-[0.005em] rounded-full text-secondary hover:bg-primary hover:text-white transition-all duration-200 outline-none"
-                          >
-                            <span>{copiedId === asset.id ? "Copied" : "Copy Link"}</span>
-                          </button>
+                        <Tooltip.Trigger
+                          onClick={() => handleCopy(asset.uri, asset.id)}
+                          className="relative px-5 py-2 text-[12px] font-semibold tracking-[0.005em] rounded-[var(--border-radius-small)] text-secondary hover:bg-primary hover:text-white transition-all duration-200 outline-none"
+                        >
+                          <span>{copiedId === asset.id ? "Copied" : "Copy Link"}</span>
                         </Tooltip.Trigger>
                         <Tooltip.Portal>
                           <Tooltip.Content
                             side="top"
                             sideOffset={10}
-                            className="z-[100000] rounded-xl bg-card-warm px-3 py-1.5 text-[12px] font-medium text-primary border border-border-warm shadow-[0_8px_24px_rgba(31,53,88,0.08)]"
+                            className="z-[100000] rounded-[var(--border-radius-medium)] bg-card-warm px-3 py-1.5 text-[12px] font-medium text-primary border border-border-warm shadow-[0_8px_24px_rgba(31,53,88,0.08)]"
                           >
                             Copy public asset URL
                             <Tooltip.Arrow className="fill-card-warm" />
@@ -206,19 +204,17 @@ export const PreviewDeliveryPanel = ({
                       </Tooltip.Root>
 
                       <Tooltip.Root>
-                        <Tooltip.Trigger asChild>
-                          <button
-                            onClick={() => handleDownload(asset.uri, `${asset.type}-${asset.id}`)}
-                            className="relative px-5 py-2 text-[12px] font-semibold tracking-[0.005em] rounded-full text-secondary hover:bg-primary hover:text-white transition-all duration-200 outline-none"
-                          >
-                            <span>Download</span>
-                          </button>
+                        <Tooltip.Trigger
+                          onClick={() => handleDownload(asset.uri, `${asset.type}-${asset.id}`)}
+                          className="relative px-5 py-2 text-[12px] font-semibold tracking-[0.005em] rounded-[var(--border-radius-small)] text-secondary hover:bg-primary hover:text-white transition-all duration-200 outline-none"
+                        >
+                          <span>Download</span>
                         </Tooltip.Trigger>
                         <Tooltip.Portal>
                           <Tooltip.Content
                             side="top"
                             sideOffset={10}
-                            className="z-[100000] rounded-xl bg-card-warm px-3 py-1.5 text-[12px] font-medium text-primary border border-border-warm shadow-[0_8px_24px_rgba(31,53,88,0.08)]"
+                            className="z-[100000] rounded-[var(--border-radius-medium)] bg-card-warm px-3 py-1.5 text-[12px] font-medium text-primary border border-border-warm shadow-[0_8px_24px_rgba(31,53,88,0.08)]"
                           >
                             Download high-res asset
                             <Tooltip.Arrow className="fill-card-warm" />
@@ -232,7 +228,7 @@ export const PreviewDeliveryPanel = ({
 
               {selectedRun?.draft && (
                 <div className="w-full max-w-[560px]">
-                  <div className="p-5 rounded-2xl bg-sage/5 border border-sage/10">
+                  <div className="p-5 rounded-[var(--border-radius-medium)] bg-sage/5 border border-sage/10">
                     <div className="text-[10px] font-bold text-sage tracking-[0.2em] mb-2">Call to action</div>
                     <p className="text-[15px] font-medium text-primary leading-snug">
                       {selectedRun.draft.cta}
@@ -248,21 +244,21 @@ export const PreviewDeliveryPanel = ({
                 <div className="space-y-8">
                   <div>
                     <div className="text-label-small mb-3 opacity-50 tracking-[0.1em]">Headline strategy</div>
-                    <h3 className="text-[26px] font-semibold tracking-[-0.03em] text-primary leading-tight">{selectedRun.draft.title}</h3>
+                    <h3 className="heading-lg text-primary">{selectedRun.draft.title}</h3>
                   </div>
 
                   <div>
                     <div className="text-label-small mb-3 opacity-50 tracking-[0.1em]">The hook</div>
-                    <p className="text-[17px] font-medium text-primary leading-relaxed italic border-l-2 border-gold/30 pl-5">{selectedRun.draft.hook}</p>
+                    <p className="text-[16px] font-medium text-primary leading-relaxed italic border-l-2 border-gold/30 pl-5">{selectedRun.draft.hook}</p>
                   </div>
 
                   <div>
                     <div className="text-label-small mb-3 opacity-50 tracking-[0.1em]">Deep dive body</div>
-                    <p className="text-[15px] text-secondary leading-[1.7] whitespace-pre-wrap">{selectedRun.draft.body}</p>
+                    <p className="body-md whitespace-pre-wrap">{selectedRun.draft.body}</p>
                   </div>
 
                   {selectedRun.draft.painPoints.length > 0 && (
-                    <div className="p-6 rounded-2xl bg-white/40">
+                    <div className="p-6 rounded-[var(--border-radius-medium)] bg-white/40">
                       <div className="text-label-small mb-4 opacity-50 tracking-[0.1em]">Target pain points</div>
                       <ul className="space-y-3">
                         {selectedRun.draft.painPoints.map((point) => (
@@ -276,7 +272,7 @@ export const PreviewDeliveryPanel = ({
                   )}
                 </div>
               ) : (
-                <div className="py-24 text-center border border-dashed border-border-warm/30 rounded-3xl">
+                <div className="py-24 text-center border border-dashed border-border-warm/30 rounded-[var(--border-radius-medium)]">
                   <p className="text-muted text-[13px] font-medium opacity-50">Drafting tactical content...</p>
                 </div>
               )}
@@ -305,7 +301,7 @@ export const PreviewDeliveryPanel = ({
             <div className="text-label-small mb-4 opacity-50">Citations</div>
             <div className="space-y-3">
               {selectedRun.draft.citations.map((citation, index) => (
-                <div key={index} className="p-4 rounded-xl border border-border-warm/30 bg-page/40">
+                <div key={index} className="p-4 rounded-[var(--border-radius-medium)] border border-border-warm/30 bg-page/40">
                   <div className="mb-2">
                     {isWebUrl(citation.sourceUrl) ? (
                       <a
@@ -358,14 +354,14 @@ export const PreviewDeliveryPanel = ({
                 <img
                   src={viewerAsset.uri}
                   alt="Full view"
-                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                  className="max-w-full max-h-[85vh] object-contain rounded-[var(--border-radius-medium)] shadow-2xl"
                 />
               ) : (
                 <video
                   src={viewerAsset.uri}
                   controls
                   autoPlay
-                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                  className="max-w-full max-h-[85vh] object-contain rounded-[var(--border-radius-medium)] shadow-2xl"
                 />
               )}
             </motion.div>

@@ -6,28 +6,25 @@ const appLinks = [
 
 export const TopBar = () => {
   return (
-    <div className="top-bar">
-      {/* Brand */}
-      <div className="flex items-center px-6 py-2 bg-white/40 border border-[#d6e2f2] rounded-pill shadow-sm">
-        <span className="text-[12px] font-bold text-primary tracking-[0.15em]">
-          PitchWord
-        </span>
+    <header className="top-bar">
+      <div className="top-bar-inner">
+        <div className="top-bar-brand">
+          <span className="top-bar-brand-text">PitchWord</span>
+        </div>
+        <nav className="top-bar-links" aria-label="Apps">
+          {appLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="top-bar-link"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
       </div>
-
-      {/* External app links — pill container like sidebar */}
-      <nav className="top-bar-pill" aria-label="Apps">
-        {appLinks.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="top-bar-link"
-          >
-            {link.label}
-          </a>
-        ))}
-      </nav>
-    </div>
+    </header>
   );
 };
