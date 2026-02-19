@@ -8,7 +8,7 @@ import { env } from "../config/env.js";
 import { createId } from "../utils/id.js";
 import { nowIso } from "../utils/time.js";
 import { LibraryService } from "./library-service.js";
-import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, STYLE_PRESETS } from "./visual-presets.js";
+import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, getResolvedStyleHint, STYLE_PRESETS } from "./visual-presets.js";
 
 const defaultLogoPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -41,7 +41,7 @@ export interface ImageGenerationOutput {
 }
 
 export class ImageAgentService {
-  constructor(private readonly libraryService?: LibraryService) {}
+  constructor(private readonly libraryService?: LibraryService) { }
 
   private ai = env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }) : undefined;
   private logoPartPromise: Promise<InlineImagePart | undefined> | undefined;
@@ -66,7 +66,7 @@ export class ImageAgentService {
       category === "infor"
         ? "Infor branding is allowed in this category, but keep it secondary and tasteful beside Cendien branding."
         : "Do not include Infor logo, Infor wordmark, or any third-party brand logos. Only Cendien branding is allowed.";
-    const stylePresetHint = getPresetHint(STYLE_PRESETS, input.stylePresetId);
+    const stylePresetHint = getResolvedStyleHint(STYLE_PRESETS, input.stylePresetId, input.fontPresetId, input.colorSchemeId);
     const fontPresetHint = getPresetHint(FONT_PRESETS, input.fontPresetId);
     const colorSchemeHint = getPresetHint(COLOR_SCHEMES, input.colorSchemeId);
     const styleLine = userStyleOverride

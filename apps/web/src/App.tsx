@@ -52,6 +52,9 @@ function App() {
   const [colorSchemeId, setColorSchemeId] = useState("executive_blue");
 
   const [graphicPrompt, setGraphicPrompt] = useState("");
+  const [graphicTopicBusy, setGraphicTopicBusy] = useState(false);
+  const [graphicPromptOptions, setGraphicPromptOptions] = useState<string[]>([]);
+  const [selectedGraphicPromptOptionIndex, setSelectedGraphicPromptOptionIndex] = useState<number | null>(null);
 
   const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
   const [teamsDefaultsLoaded, setTeamsDefaultsLoaded] = useState(false);
@@ -212,6 +215,19 @@ function App() {
     }
   };
 
+  const handleLibraryDelete = async (assetId: string): Promise<void> => {
+    try {
+      setBusy(true);
+      await apiClient.deleteLibraryAsset(assetId);
+      await refreshLibraryAssets();
+      setSelectedReferenceAssetIds((current) => current.filter((id) => id !== assetId));
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : String(deleteError));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleGenerateGraphic = async (): Promise<void> => {
     try {
       setBusy(true);
@@ -219,7 +235,7 @@ function App() {
         prompt: graphicPrompt,
         aspectRatio,
         imageResolution,
-        stylePresetId: graphicStylePresetId,
+        stylePresetId: selectedGraphicPromptOptionIndex !== null ? undefined : graphicStylePresetId,
         styleOverride: graphicStyleOverride.trim() || undefined,
         fontPresetId,
         colorSchemeId,
@@ -227,12 +243,47 @@ function App() {
       });
       await refreshLibraryAssets();
       setGraphicPrompt("");
+      setGraphicPromptOptions([]);
+      setSelectedGraphicPromptOptionIndex(null);
       setPaneView("graphics");
     } catch (graphicError) {
       setError(graphicError instanceof Error ? graphicError.message : String(graphicError));
     } finally {
       setBusy(false);
     }
+  };
+
+  const handleGenerateGraphicTopic = async (): Promise<void> => {
+    try {
+      setGraphicTopicBusy(true);
+      const result = await apiClient.generateGraphicTopic({
+        topicHint: graphicPrompt.trim() || undefined,
+        stylePresetId: graphicStylePresetId,
+        fontPresetId,
+        colorSchemeId
+      });
+      setGraphicPromptOptions(result.prompts);
+      if (result.prompts[0]) {
+        setGraphicPrompt(result.prompts[0]);
+        setSelectedGraphicPromptOptionIndex(0);
+      } else {
+        setSelectedGraphicPromptOptionIndex(null);
+      }
+    } catch (topicError) {
+      setError(topicError instanceof Error ? topicError.message : String(topicError));
+    } finally {
+      setGraphicTopicBusy(false);
+    }
+  };
+
+  const handleSelectGraphicPromptOption = (value: string, index: number): void => {
+    setGraphicPrompt(value);
+    setSelectedGraphicPromptOptionIndex(index);
+  };
+
+  const handleGraphicPromptChange = (value: string): void => {
+    setGraphicPrompt(value);
+    setSelectedGraphicPromptOptionIndex(null);
   };
 
   const handleToggleReferenceAsset = (assetId: string): void => {
@@ -372,6 +423,7 @@ function App() {
                   selectedReferenceAssetIds={selectedReferenceAssetIds}
                   onToggleReferenceAsset={handleToggleReferenceAsset}
                   onReferenceUpload={handleLibraryUpload}
+                  onReferenceDelete={handleLibraryDelete}
                   onStartManual={handleManualRun}
                   onStartDaily={handleDailyRun}
                   busy={busy}
@@ -381,7 +433,11 @@ function App() {
               {paneView === "graphics" ? (
                 <GraphicGenerationPanel
                   prompt={graphicPrompt}
-                  onPromptChange={setGraphicPrompt}
+                  onPromptChange={handleGraphicPromptChange}
+                  onGenerateTopic={handleGenerateGraphicTopic}
+                  promptOptions={graphicPromptOptions}
+                  selectedPromptOptionIndex={selectedGraphicPromptOptionIndex}
+                  onSelectPromptOption={handleSelectGraphicPromptOption}
                   aspectRatio={aspectRatio}
                   onAspectRatioChange={setAspectRatio}
                   imageResolution={imageResolution}
@@ -398,7 +454,9 @@ function App() {
                   selectedReferenceAssetIds={selectedReferenceAssetIds}
                   onToggleReferenceAsset={handleToggleReferenceAsset}
                   onReferenceUpload={handleLibraryUpload}
+                  onReferenceDelete={handleLibraryDelete}
                   onGenerate={handleGenerateGraphic}
+                  topicBusy={graphicTopicBusy}
                   busy={busy}
                 />
               ) : null}

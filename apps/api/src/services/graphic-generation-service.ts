@@ -2,12 +2,12 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import type { AspectRatio, GraphicGenerateRequest, ImageResolution, LibraryAsset } from "@marketing/shared";
 import { env } from "../config/env.js";
 import { LibraryService } from "./library-service.js";
-import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, GRAPHIC_STYLE_PRESETS } from "./visual-presets.js";
+import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, getResolvedStyleHint, GRAPHIC_STYLE_PRESETS } from "./visual-presets.js";
 
 export class GraphicGenerationService {
   private ai = env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }) : undefined;
 
-  constructor(private readonly libraryService: LibraryService) {}
+  constructor(private readonly libraryService: LibraryService) { }
 
   async generate(payload: GraphicGenerateRequest): Promise<LibraryAsset> {
     if (!this.ai) {
@@ -16,7 +16,7 @@ export class GraphicGenerationService {
 
     const maxReferences = 14;
     const referenceParts = await this.libraryService.getReferenceParts(payload.referenceAssetIds ?? [], maxReferences);
-    const styleHint = getPresetHint(GRAPHIC_STYLE_PRESETS, payload.stylePresetId);
+    const styleHint = getResolvedStyleHint(GRAPHIC_STYLE_PRESETS, payload.stylePresetId, payload.fontPresetId, payload.colorSchemeId);
     const styleOverride = payload.styleOverride?.trim();
     const fontHint = getPresetHint(FONT_PRESETS, payload.fontPresetId);
     const colorHint = getPresetHint(COLOR_SCHEMES, payload.colorSchemeId);

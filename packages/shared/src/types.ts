@@ -208,6 +208,17 @@ export interface GraphicGenerateResponse {
   asset: LibraryAsset;
 }
 
+export interface GraphicTopicGenerateRequest {
+  topicHint?: string;
+  stylePresetId?: string;
+  fontPresetId?: string;
+  colorSchemeId?: string;
+}
+
+export interface GraphicTopicGenerateResponse {
+  prompts: string[];
+}
+
 export interface AnalyticsSummary {
   totalRuns: number;
   successRate: number;

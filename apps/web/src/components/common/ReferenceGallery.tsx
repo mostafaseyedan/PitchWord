@@ -1,13 +1,14 @@
 import { type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { LibraryAsset } from "@marketing/shared";
-import { Check, Download, Eye, Upload, X } from "lucide-react";
+import { Check, Download, Eye, Trash2, Upload, X } from "lucide-react";
 
 interface ReferenceGalleryProps {
   assets: LibraryAsset[];
   selectedIds: string[];
   onToggle: (assetId: string) => void;
   onUpload: (files: FileList | null) => void;
+  onDelete: (assetId: string) => void | Promise<void>;
   busy?: boolean;
   maxSelectable?: number;
 }
@@ -17,6 +18,7 @@ export const ReferenceGallery = ({
   selectedIds,
   onToggle,
   onUpload,
+  onDelete,
   busy = false,
   maxSelectable = 14
 }: ReferenceGalleryProps) => {
@@ -154,6 +156,18 @@ export const ReferenceGallery = ({
                 >
                   <Download size={13} />
                 </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void onDelete(asset.id);
+                  }}
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-[var(--border-radius-small)] border border-white/30 bg-primary/85 text-white hover:bg-primary"
+                  aria-label={`Delete ${asset.title}`}
+                >
+                  <Trash2 size={13} />
+                </button>
               </span>
               {selected ? (
                 <span className="absolute right-1.5 top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-gold text-white shadow-[0_4px_10px_rgba(27,54,93,0.2)]">
@@ -197,6 +211,17 @@ export const ReferenceGallery = ({
               >
                 <Download size={14} />
                 Download
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  void onDelete(viewerAsset.id);
+                  setViewerAsset(null);
+                }}
+                className="absolute -top-12 right-[172px] inline-flex items-center gap-1.5 text-white/70 hover:text-white transition-colors px-2 py-1 text-[12px] font-semibold"
+              >
+                <Trash2 size={14} />
+                Delete
               </button>
               <img
                 src={viewerAsset.uri}

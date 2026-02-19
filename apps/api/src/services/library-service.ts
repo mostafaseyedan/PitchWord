@@ -146,6 +146,23 @@ export class LibraryService {
     return parts;
   }
 
+  async deleteAsset(assetId: string): Promise<boolean> {
+    const id = assetId.trim();
+    if (!id || !this.bucketName) {
+      return false;
+    }
+
+    const bucket = this.storage.bucket(this.bucketName);
+    const [files] = await bucket.getFiles({ prefix: `${this.libraryPrefix}/${id}` });
+    const targets = files.filter((file) => !file.name.endsWith("/"));
+    if (targets.length === 0) {
+      return false;
+    }
+
+    await Promise.all(targets.map((file) => file.delete({ ignoreNotFound: true })));
+    return true;
+  }
+
   private async fileToAsset(file: File): Promise<LibraryAsset> {
     const [metadata] = await file.getMetadata();
     const meta = metadata?.metadata ?? {};

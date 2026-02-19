@@ -19,6 +19,7 @@ import { registerUploadRoutes } from "./routes/uploads.js";
 import { AppSettingsService } from "./services/app-settings-service.js";
 import { ContentCreatorService } from "./services/content-creator-service.js";
 import { GraphicGenerationService } from "./services/graphic-generation-service.js";
+import { GraphicTopicService } from "./services/graphic-topic-service.js";
 import { ImageAgentService } from "./services/image-agent-service.js";
 import { InMemoryJobQueue } from "./services/job-queue.js";
 import { NewsHunterService } from "./services/news-hunter-service.js";
@@ -80,6 +81,7 @@ const start = async (): Promise<void> => {
   const videoAgentService = new VideoAgentService();
   const mediaStorageService = new MediaStorageService();
   const graphicGenerationService = new GraphicGenerationService(libraryService);
+  const graphicTopicService = new GraphicTopicService();
   const teamsDeliveryService = new TeamsDeliveryService();
   const uploadService = new UploadService();
   const settingsService = new AppSettingsService();
@@ -122,6 +124,7 @@ const start = async (): Promise<void> => {
     uploadService,
     libraryService,
     graphicGenerationService,
+    graphicTopicService,
     events
   };
 

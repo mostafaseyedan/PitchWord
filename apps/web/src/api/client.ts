@@ -4,6 +4,8 @@ import type {
   DailyRunRequest,
   GraphicGenerateRequest,
   GraphicGenerateResponse,
+  GraphicTopicGenerateRequest,
+  GraphicTopicGenerateResponse,
   LibraryAsset,
   ManualRunRequest,
   Run,
@@ -135,6 +137,13 @@ export const apiClient = {
     return parseJson<LibraryAsset>(response);
   },
 
+  async deleteLibraryAsset(assetId: string): Promise<{ deleted: boolean }> {
+    const response = await fetch(`${API_BASE}/api/library/assets/${encodeURIComponent(assetId)}`, {
+      method: "DELETE"
+    });
+    return parseJson<{ deleted: boolean }>(response);
+  },
+
   async generateGraphicAsset(payload: GraphicGenerateRequest): Promise<GraphicGenerateResponse> {
     const response = await fetch(`${API_BASE}/api/library/graphics/generate`, {
       method: "POST",
@@ -144,6 +153,17 @@ export const apiClient = {
       body: JSON.stringify(payload)
     });
     return parseJson<GraphicGenerateResponse>(response);
+  },
+
+  async generateGraphicTopic(payload: GraphicTopicGenerateRequest): Promise<GraphicTopicGenerateResponse> {
+    const response = await fetch(`${API_BASE}/api/library/graphics/topic`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+    return parseJson<GraphicTopicGenerateResponse>(response);
   },
 
   createEventSource(): EventSource {
