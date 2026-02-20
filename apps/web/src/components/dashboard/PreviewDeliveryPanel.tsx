@@ -229,9 +229,9 @@ export const PreviewDeliveryPanel = ({
               {selectedRun?.draft && (
                 <div className="w-full max-w-[560px]">
                   <div className="p-5 rounded-[var(--border-radius-medium)] bg-sage/5 border border-sage/10">
-                    <div className="text-[10px] font-bold text-sage tracking-[0.2em] mb-2">Call to action</div>
-                    <p className="text-[15px] font-medium text-primary leading-snug">
-                      {selectedRun.draft.cta}
+                    <div className="text-[10px] font-bold text-sage tracking-[0.2em] mb-2">Category</div>
+                    <p className="text-[15px] font-medium text-primary leading-snug capitalize">
+                      {selectedRun.draft.category.replace(/_/g, " ")}
                     </p>
                   </div>
                 </div>
@@ -241,15 +241,21 @@ export const PreviewDeliveryPanel = ({
             {/* Right Column: Key Draft Contents */}
             <div className="flex flex-col">
               {selectedRun?.draft ? (
-                <div className="space-y-8">
+                <div className="space-y-8 relative">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const textToCopy = `${selectedRun.draft!.title}\n\n${selectedRun.draft!.body}`;
+                      navigator.clipboard.writeText(textToCopy);
+                    }}
+                    className="absolute top-0 right-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--border-radius-small)] border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-[11px] font-semibold text-secondary hover:text-primary hover:border-[color:var(--primary-color)] transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    Copy Content
+                  </button>
                   <div>
                     <div className="text-label-small mb-3 opacity-50 tracking-[0.1em]">Headline strategy</div>
-                    <h3 className="heading-lg text-primary">{selectedRun.draft.title}</h3>
-                  </div>
-
-                  <div>
-                    <div className="text-label-small mb-3 opacity-50 tracking-[0.1em]">The hook</div>
-                    <p className="text-[16px] font-medium text-primary leading-relaxed italic border-l-2 border-gold/30 pl-5">{selectedRun.draft.hook}</p>
+                    <h3 className="heading-lg text-primary pr-24">{selectedRun.draft.title}</h3>
                   </div>
 
                   <div>

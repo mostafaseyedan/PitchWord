@@ -1,7 +1,7 @@
 import { type MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { LibraryAsset } from "@marketing/shared";
-import { Check, Download, Eye, Trash2, Upload, X } from "lucide-react";
+import { Check, Download, Eye, Trash2, Upload, X, WandSparkles } from "lucide-react";
 
 interface ReferenceGalleryProps {
   assets: LibraryAsset[];
@@ -11,6 +11,8 @@ interface ReferenceGalleryProps {
   onDelete: (assetId: string) => void | Promise<void>;
   busy?: boolean;
   maxSelectable?: number;
+  mode?: "select" | "view";
+  onRegenerate?: (prompt: string) => void;
 }
 
 export const ReferenceGallery = ({
@@ -20,7 +22,9 @@ export const ReferenceGallery = ({
   onUpload,
   onDelete,
   busy = false,
-  maxSelectable = 14
+  maxSelectable = 14,
+  mode = "select",
+  onRegenerate
 }: ReferenceGalleryProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [viewerAsset, setViewerAsset] = useState<LibraryAsset | null>(null);
@@ -74,43 +78,47 @@ export const ReferenceGallery = ({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <label className="field-label !mb-0">Reference Gallery</label>
-        <div className="flex items-center gap-2.5">
-          <span className="text-[11px] text-secondary/70">{selectedIds.length}/{maxSelectable} selected</span>
+      {mode === "select" && (
+        <>
+          <div className="flex items-center justify-between">
+            <label className="field-label !mb-0">Reference Gallery</label>
+            <div className="flex items-center gap-2.5">
+              <span className="text-[11px] text-secondary/70">{selectedIds.length}/{maxSelectable} selected</span>
+              <button
+                type="button"
+                onClick={handleDeselectAll}
+                disabled={busy || selectedIds.length === 0}
+                className="text-[11px] font-medium text-secondary/75 hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Deselect all
+              </button>
+            </div>
+          </div>
+
+          <input
+            ref={inputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={(e) => onUpload(e.target.files)}
+            className="file-input-hidden"
+          />
           <button
             type="button"
-            onClick={handleDeselectAll}
-            disabled={busy || selectedIds.length === 0}
-            className="text-[11px] font-medium text-secondary/75 hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            onClick={() => inputRef.current?.click()}
+            disabled={busy}
+            className="inline-flex items-center justify-center gap-2 w-[122px] max-w-full px-3 py-2 rounded-[var(--border-radius-small)] border border-transparent bg-primary text-white text-[11px] font-semibold shadow-[0_4px_12px_rgba(27,54,93,0.22)] hover:bg-[#162f4f] hover:shadow-[0_8px_18px_rgba(27,54,93,0.28)] transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Deselect all
+            <Upload size={14} strokeWidth={2} className="text-white/90" />
+            <span>Upload</span>
           </button>
-        </div>
-      </div>
-
-      <input
-        ref={inputRef}
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={(e) => onUpload(e.target.files)}
-        className="file-input-hidden"
-      />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={busy}
-        className="inline-flex items-center justify-center gap-2 w-[122px] max-w-full px-3 py-2 rounded-[var(--border-radius-small)] border border-transparent bg-primary text-white text-[11px] font-semibold shadow-[0_4px_12px_rgba(27,54,93,0.22)] hover:bg-[#162f4f] hover:shadow-[0_8px_18px_rgba(27,54,93,0.28)] transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        <Upload size={14} strokeWidth={2} className="text-white/90" />
-        <span>Upload</span>
-      </button>
+        </>
+      )}
 
       <div className="columns-4 sm:columns-6 [column-gap:0.5rem]">
         {assets.map((asset) => {
-          const selected = selectedIds.includes(asset.id);
-          const disabled = !selected && selectedIds.length >= maxSelectable;
+          const selected = mode === "select" && selectedIds.includes(asset.id);
+          const disabled = mode === "select" && !selected && selectedIds.length >= maxSelectable;
           return (
             <div
               key={asset.id}
@@ -123,27 +131,29 @@ export const ReferenceGallery = ({
             >
               <button
                 type="button"
-                onClick={() => onToggle(asset.id)}
+                onClick={() => mode === "view" ? setViewerAsset(asset) : onToggle(asset.id)}
                 disabled={disabled}
                 className="block w-full text-left"
-                aria-label={selected ? `Deselect ${asset.title}` : `Select ${asset.title}`}
+                aria-label={mode === "view" ? `View ${asset.title}` : (selected ? `Deselect ${asset.title}` : `Select ${asset.title}`)}
               >
                 <img src={asset.uri} alt={asset.title} className="block w-full h-auto object-contain" />
                 <span className="pointer-events-none absolute inset-0 bg-primary/0 transition-colors duration-150 group-hover:bg-primary/10" />
               </button>
               <span className="absolute bottom-1.5 right-1.5 flex items-center gap-1 opacity-0 translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-y-0">
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    setViewerAsset(asset);
-                  }}
-                  className="inline-flex h-6 w-6 items-center justify-center rounded-[var(--border-radius-small)] border border-white/30 bg-primary/85 text-white hover:bg-primary"
-                  aria-label={`View ${asset.title}`}
-                >
-                  <Eye size={13} />
-                </button>
+                {mode === "select" && (
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setViewerAsset(asset);
+                    }}
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-[var(--border-radius-small)] border border-white/30 bg-primary/85 text-white hover:bg-primary"
+                    aria-label={`View ${asset.title}`}
+                  >
+                    <Eye size={13} />
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={(event) => {
@@ -223,11 +233,32 @@ export const ReferenceGallery = ({
                 <Trash2 size={14} />
                 Delete
               </button>
-              <img
-                src={viewerAsset.uri}
-                alt={viewerAsset.title}
-                className="max-w-full max-h-[85vh] object-contain rounded-[var(--border-radius-medium)] shadow-2xl"
-              />
+              <div className="flex flex-col items-center">
+                <img
+                  src={viewerAsset.uri}
+                  alt={viewerAsset.title}
+                  className="max-w-full max-h-[85vh] object-contain rounded-[var(--border-radius-medium)] shadow-2xl"
+                />
+                {mode === "view" && viewerAsset.prompt && (
+                  <div className="mt-4 w-full max-w-2xl bg-white/10 backdrop-blur-md rounded-[var(--border-radius-medium)] p-4 border border-white/20">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70 mb-1">Prompt Used</div>
+                    <p className="text-white text-[14px] leading-relaxed mb-3">{viewerAsset.prompt}</p>
+                    {onRegenerate && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onRegenerate(viewerAsset.prompt!);
+                          setViewerAsset(null);
+                        }}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-[var(--border-radius-small)] bg-primary text-white text-[12px] font-semibold hover:bg-[#162f4f] transition-colors"
+                      >
+                        <WandSparkles size={14} />
+                        Regenerate with this prompt
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </motion.div>
           </motion.div>
         ) : null}

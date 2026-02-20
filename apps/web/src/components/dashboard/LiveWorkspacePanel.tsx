@@ -75,11 +75,7 @@ export const LiveWorkspacePanel = ({ selectedRun, onShowResult }: LiveWorkspaceP
             <div className="mt-8 pt-8 border-t border-border-warm/30">
               <div className="text-label-small mb-3 opacity-50">Content Draft</div>
               <h3 className="heading-lg text-primary mb-3">{selectedRun.draft.title}</h3>
-              <p className="text-[14px] font-medium text-primary mb-3">{selectedRun.draft.hook}</p>
               <p className="body-md mb-4">{selectedRun.draft.body}</p>
-              <div className="flex gap-2 text-[12px] text-secondary mb-4">
-                <span className="font-bold text-primary opacity-60">CTA:</span> {selectedRun.draft.cta}
-              </div>
               {selectedRun.draft.painPoints.length > 0 ? (
                 <div className="bg-page/40 rounded-2xl p-4 border border-border-warm/20">
                   <div className="text-[10px] font-bold text-primary uppercase tracking-widest opacity-40 mb-3">Target Pain Points</div>

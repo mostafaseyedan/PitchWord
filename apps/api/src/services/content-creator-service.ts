@@ -63,10 +63,10 @@ export class ContentCreatorService {
       "The painPoints field in the output must reference specific pain points from the list above that this post addresses.",
       "",
       "Grounding requirement: You must use grounding tool results and prioritize those facts.",
-      "Length requirement: the combined body text (hook + body + cta) must be 150-300 words. This is a LinkedIn post, not a blog article.",
+      "Length requirement: 1 title and max 3 lines of body text. Keep it extremely concise.",
       "Title requirement: include the exact word 'Cendien' in the title.",
       "Output format contract (strict): return ONLY one JSON object and nothing else.",
-      'Use exactly this shape: {"title":"string","hook":"string","body":"string","cta":"string","painPoints":["string"],"category":"string"}',
+      'Use exactly this shape: {"title":"string","body":"string","painPoints":["string"],"category":"string"}',
       `Category must be exactly: "${input.category}".`,
       "Do not wrap in markdown. Do not use code fences. Do not add commentary."
     ]
@@ -109,9 +109,7 @@ export class ContentCreatorService {
       title: this.ensureCendienInTitle(
         String(parsed?.title ?? this.inferTitleFromText(text) ?? "Cendien market signal your buyers are reacting to this week")
       ),
-      hook: String(parsed?.hook ?? "Teams that prove value faster are winning pipeline."),
       body: String(parsed?.body ?? this.fallbackBodyFromText(text, input.newsSummary)),
-      cta: String(parsed?.cta ?? "Comment if you want a practical checklist."),
       painPoints: Array.isArray(parsed?.painPoints)
         ? parsed!.painPoints.map((value: unknown) => String(value))
         : ["Slow execution", "Unclear ROI"],

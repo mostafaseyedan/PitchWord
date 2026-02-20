@@ -77,7 +77,8 @@ export class GraphicGenerationService {
     return this.libraryService.saveGeneratedAsset({
       uri,
       title: this.buildTitle(payload.prompt),
-      mimeTypeHint
+      mimeTypeHint,
+      prompt: payload.prompt
     });
   }
 

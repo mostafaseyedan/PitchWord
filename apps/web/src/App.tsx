@@ -235,7 +235,7 @@ function App() {
         prompt: graphicPrompt,
         aspectRatio,
         imageResolution,
-        stylePresetId: selectedGraphicPromptOptionIndex !== null ? undefined : graphicStylePresetId,
+        stylePresetId: graphicStylePresetId,
         styleOverride: graphicStyleOverride.trim() || undefined,
         fontPresetId,
         colorSchemeId,
@@ -257,10 +257,7 @@ function App() {
     try {
       setGraphicTopicBusy(true);
       const result = await apiClient.generateGraphicTopic({
-        topicHint: graphicPrompt.trim() || undefined,
-        stylePresetId: graphicStylePresetId,
-        fontPresetId,
-        colorSchemeId
+        topicHint: graphicPrompt.trim() || undefined
       });
       setGraphicPromptOptions(result.prompts);
       if (result.prompts[0]) {

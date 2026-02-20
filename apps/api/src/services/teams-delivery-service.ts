@@ -245,9 +245,7 @@ export class TeamsDeliveryService {
 
     const lines = [
       `<h3>${this.escapeHtml(draft.title)}</h3>`,
-      `<p><strong>${this.escapeHtml(draft.hook)}</strong></p>`,
-      `<p>${this.escapeHtml(draft.body).replace(/\n/g, "<br/>")}</p>`,
-      `<p><em>${this.escapeHtml(draft.cta)}</em></p>`
+      `<p>${this.escapeHtml(draft.body).replace(/\n/g, "<br/>")}</p>`
     ];
 
     if (imageUrl) {
@@ -272,7 +270,7 @@ export class TeamsDeliveryService {
     const imageUrl = image ? this.getShareableUrl(image.uri) : undefined;
     const videoUrl = video ? this.getShareableUrl(video.uri) : undefined;
 
-    const lines = [draft.title, "", draft.hook, "", draft.body, "", `CTA: ${draft.cta}`];
+    const lines = [draft.title, "", draft.body];
 
     if (imageUrl) {
       lines.push("", `Image: ${imageUrl}`);
@@ -299,12 +297,6 @@ export class TeamsDeliveryService {
         weight: "Bolder",
         wrap: true
       },
-      {
-        type: "TextBlock",
-        text: draft.hook,
-        wrap: true,
-        spacing: "Medium"
-      },
       ...(imageUrl
         ? [
             {
@@ -320,13 +312,6 @@ export class TeamsDeliveryService {
         text: draft.body,
         wrap: true,
         spacing: "Medium"
-      },
-      {
-        type: "TextBlock",
-        text: `CTA: ${draft.cta}`,
-        wrap: true,
-        spacing: "Medium",
-        weight: "Bolder"
       }
     ];
 
@@ -381,12 +366,10 @@ export class TeamsDeliveryService {
 
     const lines = [
       `<h3>${this.escapeHtml(draft.title)}</h3>`,
-      `<p><strong>${this.escapeHtml(draft.hook)}</strong></p>`,
       ...(imageUrl
         ? [`<p><img src="${imageUrl}" alt="Generated campaign image" style="max-width:100%;border-radius:8px;" /></p>`]
         : []),
-      `<p>${this.escapeHtml(draft.body).replace(/\n/g, "<br/>")}</p>`,
-      `<p><em>${this.escapeHtml(draft.cta)}</em></p>`
+      `<p>${this.escapeHtml(draft.body).replace(/\n/g, "<br/>")}</p>`
     ];
 
     if (videoUrl) {

@@ -68,7 +68,6 @@ export class VideoAgentService {
     const prompt = [
       "Generate a short cinematic teaser video for an enterprise marketing post.",
       `Title: ${draft.title}`,
-      `Hook: ${draft.hook}`,
       `Category visual style:\n${categoryVideoStyle}`,
       "Use enterprise-grade realism and smooth camera movement.",
       "No text overlays.",
@@ -306,7 +305,7 @@ export class VideoAgentService {
       case "customer_pain_point":
         return [
           "Create a transformation narrative for Cendien.",
-          `Focus this concept: ${draft.title} | ${draft.hook}`,
+          `Focus this concept: ${draft.title}`,
           "Open on a blueprint-like operations diagram with congestion, bottlenecks, and risk signals.",
           "Transition to a clean, stabilized enterprise workflow view with resolved pathways and smooth execution.",
           "Camera: isometric-to-cinematic push with technical clarity.",

@@ -1,8 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import type { GraphicTopicGenerateRequest } from "@marketing/shared";
 import { env } from "../config/env.js";
-import { COLOR_SCHEMES, FONT_PRESETS, GRAPHIC_STYLE_PRESETS, resolveStyleHint } from "./visual-presets.js";
-import type { FontPreset, ColorSchemePreset } from "./visual-presets.js";
 
 export class GraphicTopicService {
   private ai = env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }) : undefined;
@@ -13,17 +11,12 @@ export class GraphicTopicService {
       throw new Error("Gemini client is not configured. Set GEMINI_API_KEY for topic generation.");
     }
 
-    const stylePreset = GRAPHIC_STYLE_PRESETS.find((item) => item.id === payload.stylePresetId);
-    const fontPreset = (FONT_PRESETS as FontPreset[]).find((item) => item.id === payload.fontPresetId);
-    const colorPreset = (COLOR_SCHEMES as ColorSchemePreset[]).find((item) => item.id === payload.colorSchemeId);
-    const styleHint = stylePreset ? resolveStyleHint(stylePreset.promptHint, fontPreset, colorPreset)?.trim() : undefined;
-    const fontHint = fontPreset?.promptHint?.trim() || undefined;
-    const colorHint = colorPreset?.promptHint?.trim() || undefined;
     const topicHint = payload.topicHint?.trim();
 
     const prompt = [
       "Generate exactly 6 graphic-generation prompts for a Cendien enterprise marketing visual.",
       "Keep it specific, concrete, and production-ready.",
+      "Each prompt should be just 1 to 2 lines about the topic.",
       "No markdown, bullets, numbering, preambles, or extra commentary.",
       "Do not output instruction templates or labels like PAGE STYLE, STRUCTURE REQUIREMENTS, VISUAL RULES, MUST INCLUDE, or Section 1/2/3.",
       "",
@@ -40,12 +33,6 @@ export class GraphicTopicService {
       "PROMPT:: Flat infographic layout showing challenge-solution-outcome sequence with concise enterprise visual hierarchy.",
       "Prioritize clear visual scanning and restrained corporate styling.",
       "",
-      stylePreset?.label ? `Selected style preset: ${stylePreset.label}.` : "",
-      styleHint ? `Style guidance (summary): ${styleHint}` : "",
-      fontPreset?.label ? `Selected font preset: ${fontPreset.label}.` : "",
-      fontHint ? `Font guidance (summary): ${fontHint}` : "",
-      colorPreset?.label ? `Selected color preset: ${colorPreset.label}.` : "",
-      colorHint ? `Color guidance (summary): ${colorHint}` : "",
       topicHint ? `Optional user hint: ${topicHint}` : ""
     ]
       .filter(Boolean)
@@ -53,7 +40,7 @@ export class GraphicTopicService {
 
     const startedAt = Date.now();
     console.log(
-      `[graphic-topic] gemini_call_start model=${env.GEMINI_TEXT_MODEL} style=${payload.stylePresetId ?? "none"} font=${payload.fontPresetId ?? "none"} color=${payload.colorSchemeId ?? "none"} has_topic_hint=${topicHint ? "yes" : "no"}`
+      `[graphic-topic] gemini_call_start model=${env.GEMINI_TEXT_MODEL} has_topic_hint=${topicHint ? "yes" : "no"}`
     );
 
     let response: any;

@@ -14,10 +14,7 @@ const graphicSchema = z.object({
 });
 
 const graphicTopicSchema = z.object({
-  topicHint: z.string().max(2400).optional(),
-  stylePresetId: z.string().optional(),
-  fontPresetId: z.string().optional(),
-  colorSchemeId: z.string().optional()
+  topicHint: z.string().max(2400).optional()
 });
 
 export const registerLibraryRoutes: RouteRegistrar = (app, deps) => {

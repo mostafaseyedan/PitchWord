@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { LibraryAsset } from "@marketing/shared";
 import type {
   AspectRatio,
@@ -8,8 +9,9 @@ import type {
   VideoDuration,
   VideoResolution
 } from "@marketing/shared";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { X } from "lucide-react";
 import { Button } from "../common/Button";
 import { SegmentedControl } from "../common/SegmentedControl";
 import { DropdownField } from "../common/DropdownField";
@@ -292,6 +294,9 @@ export const RunSetupPanel = ({
   onStartDaily,
   busy,
 }: RunSetupPanelProps) => {
+  const [isReferenceModalOpen, setIsReferenceModalOpen] = useState(false);
+  const [galleryTab, setGalleryTab] = useState<"generated" | "uploaded">("generated");
+  const [modalTab, setModalTab] = useState<"generated" | "uploaded">("generated");
   const selectedCategory = categoryOptions.find((option) => option.value === category);
   const sectionClassName = "rounded-[var(--border-radius-medium)] border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] p-4";
   const stepClassName = "rounded-[var(--border-radius-medium)] border border-[color:var(--layout-border-color)] bg-[color:var(--primary-highlighted-color)] p-4";
@@ -307,11 +312,6 @@ export const RunSetupPanel = ({
       type: "custom" as const,
       render: () => <ColorSwatchStrip swatches={item.swatches} />,
     },
-  }));
-  const contentStyleDropdownOptions = stylePresetOptions.map((item) => ({
-    value: item.id,
-    label: item.label,
-    preview: contentStylePreviewById[item.id] ?? null
   }));
 
   return (
@@ -348,17 +348,24 @@ export const RunSetupPanel = ({
               </span>
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">Step 1</div>
-                <h3 className="text-[15px] font-semibold text-primary mt-0.5">Strategy and Visual Direction</h3>
+                <h3 className="text-[15px] font-semibold text-primary mt-0.5">Strategy</h3>
               </div>
             </div>
 
-            <div className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(360px,1fr))]">
+            <div className="mt-4 flex flex-col gap-4">
               <section className={sectionClassName}>
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
                     <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary">Strategy</div>
                     <p className="text-[14px] text-secondary mt-1">Pick narrative framing and the primary input source.</p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsReferenceModalOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 w-auto max-w-full px-3 py-2 rounded-[var(--border-radius-small)] border border-transparent bg-primary text-white text-[11px] font-semibold shadow-[0_4px_12px_rgba(27,54,93,0.22)] hover:bg-[#162f4f] hover:shadow-[0_8px_18px_rgba(27,54,93,0.28)] transition-all duration-150 cursor-pointer shrink-0"
+                  >
+                    <span>Add reference image</span>
+                  </button>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
@@ -406,51 +413,54 @@ export const RunSetupPanel = ({
                   />
                 </div>
               </section>
+            </div>
+          </section>
 
+          <section className={stepClassName}>
+            <div className="flex items-start gap-3">
+              <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-[12px] font-semibold text-primary">
+                2
+              </span>
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">Step 2</div>
+                <h3 className="text-[15px] font-semibold text-primary mt-0.5">Visual Direction and Output Format</h3>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-4">
               <section className={sectionClassName}>
-                <div className="mb-4 flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary">Visual Direction</div>
-                    <p className="text-[14px] text-secondary mt-1">Control look-and-feel presets and optional style override.</p>
-                  </div>
+                <div className="mb-4">
+                  <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary">Output Format & Visual Direction</div>
+                  <p className="text-[14px] text-secondary mt-1">Tune delivery mode, canvas constraints, and look-and-feel presets.</p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                  <div>
+                    <label className="field-label">Media Mode</label>
+                    <SegmentedControl
+                      options={mediaModeOptions}
+                      value={mediaMode}
+                      onChange={onMediaModeChange}
+                      label="Media mode selector"
+                    />
+                  </div>
                   <DropdownField
-                    id="style-preset-selector"
-                    reserveLabelSpace
-                    options={contentStyleDropdownOptions}
-                    value={stylePresetId}
-                    onChange={onStylePresetIdChange}
-                    ariaLabel="Style preset selector"
-                    optionRenderer={(option) => (
-                      <Tooltip.Root>
-                        <Tooltip.Trigger asChild>
-                          <span className="inline-flex items-center text-[13px] font-medium text-primary">{option.label}</span>
-                        </Tooltip.Trigger>
-                        {option.preview ? (
-                          <Tooltip.Portal>
-                            <Tooltip.Content
-                              side="right"
-                              align="center"
-                              sideOffset={10}
-                              className="z-[100010] w-64 rounded-[var(--border-radius-medium)] border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] p-2.5 shadow-[0_14px_32px_rgba(24,38,58,0.24)]"
-                            >
-                              <div
-                                className={`mb-2 w-full rounded-[var(--border-radius-small)] border border-[color:var(--ui-border-color)] ${option.preview.imageUrl ? "p-1 h-auto" : "p-2 h-24"}`}
-                                style={{ background: option.preview.background }}
-                              >
-                                {renderContentStylePreviewScene(option.preview)}
-                              </div>
-                              <div className="text-[12px] font-semibold text-primary">{option.preview.title}</div>
-                              <p className="mt-1 text-[12px] leading-4 text-secondary">{option.preview.description}</p>
-                              <Tooltip.Arrow className="fill-[color:var(--secondary-background-color)]" />
-                            </Tooltip.Content>
-                          </Tooltip.Portal>
-                        ) : null}
-                      </Tooltip.Root>
-                    )}
+                    id="image-aspect-ratio-selector"
+                    label="Image Aspect Ratio"
+                    options={aspectRatioOptions}
+                    value={aspectRatio}
+                    onChange={onAspectRatioChange}
+                    ariaLabel="Aspect ratio selector"
                   />
+                  <div>
+                    <label className="field-label">Image Resolution</label>
+                    <SegmentedControl
+                      options={imageResolutionOptions}
+                      value={imageResolution}
+                      onChange={onImageResolutionChange}
+                      label="Resolution selector"
+                    />
+                  </div>
                   <DropdownField
                     id="font-preset-selector"
                     label="Font Preset"
@@ -469,68 +479,6 @@ export const RunSetupPanel = ({
                     onChange={onColorSchemeIdChange}
                     ariaLabel="Color scheme selector"
                   />
-                </div>
-
-                <div className="mt-4">
-                  <TextAreaField
-                    id="image-style-instruction"
-                    label="Image Design Override (optional)"
-                    value={imageStyleInstruction}
-                    onChange={onImageStyleInstructionChange}
-                    placeholder="e.g. clean editorial composition, warm sunset lighting, shallow depth of field, subtle geometric background..."
-                  />
-                </div>
-              </section>
-            </div>
-          </section>
-
-          <section className={stepClassName}>
-            <div className="flex items-start gap-3">
-              <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-[12px] font-semibold text-primary">
-                2
-              </span>
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-secondary">Step 2</div>
-                <h3 className="text-[15px] font-semibold text-primary mt-0.5">Output and Reference Context</h3>
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(360px,1fr))]">
-              <section className={sectionClassName}>
-                <div className="mb-4">
-                  <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary">Output Format</div>
-                  <p className="text-[14px] text-secondary mt-1">Tune delivery mode and canvas constraints.</p>
-                </div>
-
-                <div>
-                  <label className="field-label">Media Mode</label>
-                  <SegmentedControl
-                    options={mediaModeOptions}
-                    value={mediaMode}
-                    onChange={onMediaModeChange}
-                    label="Media mode selector"
-                  />
-                </div>
-
-                <div className="grid gap-4 mt-4 md:grid-cols-2">
-                  <DropdownField
-                    id="image-aspect-ratio-selector"
-                    label="Image Aspect Ratio"
-                    options={aspectRatioOptions}
-                    value={aspectRatio}
-                    onChange={onAspectRatioChange}
-                    ariaLabel="Aspect ratio selector"
-                  />
-
-                  <div>
-                    <label className="field-label">Image Resolution</label>
-                    <SegmentedControl
-                      options={imageResolutionOptions}
-                      value={imageResolution}
-                      onChange={onImageResolutionChange}
-                      label="Resolution selector"
-                    />
-                  </div>
                 </div>
 
                 {mediaMode === "image_video" ? (
@@ -572,24 +520,49 @@ export const RunSetupPanel = ({
                     </div>
                   </div>
                 ) : null}
-              </section>
 
-              <section className={sectionClassName}>
-                <div className="mb-4">
-                  <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-secondary">Reference Context</div>
-                  <p className="text-[14px] text-secondary mt-1">
-                    Add visual references to align generated output with brand context.
-                  </p>
+                <div className="grid gap-4 mt-4 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <label className="field-label">Style Preset</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mt-2">
+                      {stylePresetOptions.map((preset) => {
+                        const preview = contentStylePreviewById[preset.id];
+                        const isSelected = stylePresetId === preset.id;
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => onStylePresetIdChange(preset.id)}
+                            className={`flex flex-col items-center gap-2 p-2 rounded-[var(--border-radius-medium)] border-2 transition-all text-left ${
+                              isSelected
+                                ? "border-primary bg-primary/5 shadow-sm"
+                                : "border-transparent bg-[color:var(--secondary-background-color)] hover:border-border-warm/70"
+                            }`}
+                          >
+                            <span className={`text-[11px] font-semibold text-center leading-tight ${isSelected ? "text-primary" : "text-secondary"}`}>
+                              {preset.label}
+                            </span>
+                            <div
+                              className={`w-full aspect-video rounded-[var(--border-radius-small)] border border-[color:var(--ui-border-color)] overflow-hidden ${preview?.imageUrl ? "p-0" : "p-2"}`}
+                              style={{ background: preview?.background }}
+                            >
+                              {preview ? renderContentStylePreviewScene(preview) : null}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <TextAreaField
+                      id="image-style-instruction"
+                      label="Image Design Override (optional)"
+                      value={imageStyleInstruction}
+                      onChange={onImageStyleInstructionChange}
+                      placeholder="e.g. clean editorial composition, warm sunset lighting, shallow depth of field, subtle geometric background..."
+                    />
+                  </div>
                 </div>
-                <ReferenceGallery
-                  assets={referenceAssets}
-                  selectedIds={selectedReferenceAssetIds}
-                  onToggle={onToggleReferenceAsset}
-                  onUpload={onReferenceUpload}
-                  onDelete={onReferenceDelete}
-                  busy={busy}
-                  maxSelectable={14}
-                />
               </section>
             </div>
           </section>
@@ -604,6 +577,68 @@ export const RunSetupPanel = ({
           </div>
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {isReferenceModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-primary/80 backdrop-blur-sm"
+            onClick={() => setIsReferenceModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-[var(--border-radius-large)] bg-[color:var(--primary-background-color)] p-6 shadow-2xl"
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold text-primary">Reference Images</h2>
+                  <p className="text-sm text-secondary mt-1">Select images to guide the generation style.</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <SegmentedControl
+                    options={[
+                      { value: "generated", label: "Generated" },
+                      { value: "uploaded", label: "Uploaded" },
+                    ]}
+                    value={modalTab}
+                    onChange={(val) => setModalTab(val as "generated" | "uploaded")}
+                    label="Modal Tab"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsReferenceModalOpen(false)}
+                    className="p-2 text-secondary hover:text-primary transition-colors rounded-full hover:bg-black/5"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              </div>
+              
+              <ReferenceGallery
+                assets={referenceAssets.filter(a => modalTab === "generated" ? a.source === "graphic_generated" : a.source === "upload")}
+                selectedIds={selectedReferenceAssetIds}
+                onToggle={onToggleReferenceAsset}
+                onUpload={onReferenceUpload}
+                onDelete={onReferenceDelete}
+                busy={busy}
+                maxSelectable={14}
+                mode="select"
+              />
+              
+              <div className="mt-6 flex justify-end border-t border-[color:var(--ui-border-color)] pt-4">
+                <Button variant="primary" onClick={() => setIsReferenceModalOpen(false)}>
+                  Done
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Tooltip.Provider>
   );
 };

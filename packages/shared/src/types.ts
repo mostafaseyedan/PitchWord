@@ -66,9 +66,7 @@ export interface Citation {
 
 export interface ContentDraft {
   title: string;
-  hook: string;
   body: string;
-  cta: string;
   painPoints: string[];
   citations: Citation[];
   category: Category;
@@ -191,6 +189,7 @@ export interface LibraryAsset {
   sizeBytes: number;
   source: LibraryAssetSource;
   createdAt: string;
+  prompt?: string;
 }
 
 export interface GraphicGenerateRequest {
@@ -210,9 +209,6 @@ export interface GraphicGenerateResponse {
 
 export interface GraphicTopicGenerateRequest {
   topicHint?: string;
-  stylePresetId?: string;
-  fontPresetId?: string;
-  colorSchemeId?: string;
 }
 
 export interface GraphicTopicGenerateResponse {
