@@ -56,6 +56,10 @@ function App() {
   const [graphicPromptOptions, setGraphicPromptOptions] = useState<string[]>([]);
   const [selectedGraphicPromptOptionIndex, setSelectedGraphicPromptOptionIndex] = useState<number | null>(null);
 
+  const [runPromptOptions, setRunPromptOptions] = useState<string[]>([]);
+  const [runPromptTopicBusy, setRunPromptTopicBusy] = useState(false);
+  const [selectedRunPromptOptionIndex, setSelectedRunPromptOptionIndex] = useState<number | null>(null);
+
   const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
   const [teamsDefaultsLoaded, setTeamsDefaultsLoaded] = useState(false);
 
@@ -193,6 +197,34 @@ function App() {
       setBusy(false);
       setActiveRunId(null);
     }
+  };
+
+  const handleGenerateRunPrompts = async (): Promise<void> => {
+    try {
+      setRunPromptTopicBusy(true);
+      const result = await apiClient.generateRunPrompts({
+        category,
+        tone,
+        topicHint: (manualIdeaText || selectedNewsTopic).trim() || undefined,
+        stylePresetId
+      });
+      setRunPromptOptions(result.prompts);
+      if (result.prompts[0]) {
+        setManualIdeaText(result.prompts[0]);
+        setSelectedRunPromptOptionIndex(0);
+      } else {
+        setSelectedRunPromptOptionIndex(null);
+      }
+    } catch (topicError) {
+      setError(topicError instanceof Error ? topicError.message : String(topicError));
+    } finally {
+      setRunPromptTopicBusy(false);
+    }
+  };
+
+  const handleSelectRunPromptOption = (value: string, index: number): void => {
+    setManualIdeaText(value);
+    setSelectedRunPromptOptionIndex(index);
   };
 
   const refreshLibraryAssets = async (): Promise<void> => {
@@ -415,7 +447,12 @@ function App() {
                   newsTopic={selectedNewsTopic}
                   onNewsTopicChange={setSelectedNewsTopic}
                   manualIdea={manualIdeaText}
-                  onManualIdeaChange={setManualIdeaText}
+                  onManualIdeaChange={(val) => { setManualIdeaText(val); setSelectedRunPromptOptionIndex(null); }}
+                  promptOptions={runPromptOptions}
+                  selectedPromptOptionIndex={selectedRunPromptOptionIndex}
+                  onSelectPromptOption={handleSelectRunPromptOption}
+                  onGeneratePrompts={handleGenerateRunPrompts}
+                  topicBusy={runPromptTopicBusy}
                   referenceAssets={libraryAssets}
                   selectedReferenceAssetIds={selectedReferenceAssetIds}
                   onToggleReferenceAsset={handleToggleReferenceAsset}

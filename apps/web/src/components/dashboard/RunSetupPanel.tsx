@@ -11,7 +11,7 @@ import type {
 } from "@marketing/shared";
 import { AnimatePresence, motion } from "framer-motion";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { X } from "lucide-react";
+import { WandSparkles, X } from "lucide-react";
 import { Button } from "../common/Button";
 import { SegmentedControl } from "../common/SegmentedControl";
 import { DropdownField } from "../common/DropdownField";
@@ -58,6 +58,11 @@ interface RunSetupPanelProps {
   onStartManual: () => void;
   onStartDaily: () => void;
   busy: boolean;
+  onGeneratePrompts: () => void;
+  promptOptions: string[];
+  selectedPromptOptionIndex: number | null;
+  onSelectPromptOption: (value: string, index: number) => void;
+  topicBusy: boolean;
 }
 
 const toneOptions: { value: Tone; label: string }[] = [
@@ -256,6 +261,14 @@ const renderContentStylePreviewScene = (preview: ContentStylePreview) => {
   );
 };
 
+const truncatePromptPreview = (value: string, maxLength = 110): string => {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+  return `${normalized.slice(0, maxLength - 1)}...`;
+};
+
 export const RunSetupPanel = ({
   tone,
   onToneChange,
@@ -293,6 +306,11 @@ export const RunSetupPanel = ({
   onStartManual,
   onStartDaily,
   busy,
+  onGeneratePrompts,
+  promptOptions,
+  selectedPromptOptionIndex,
+  onSelectPromptOption,
+  topicBusy,
 }: RunSetupPanelProps) => {
   const [isReferenceModalOpen, setIsReferenceModalOpen] = useState(false);
   const [galleryTab, setGalleryTab] = useState<"generated" | "uploaded">("generated");
@@ -412,6 +430,41 @@ export const RunSetupPanel = ({
                     placeholder="Type manual idea to skip news selection..."
                   />
                 </div>
+
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="text-[12px] text-secondary">Generate 4 prompt variations from your current strategy.</p>
+                  <button
+                    type="button"
+                    onClick={onGeneratePrompts}
+                    disabled={busy || topicBusy}
+                    className="inline-flex items-center justify-center gap-1.5 max-w-full px-2.5 py-1.5 rounded-[var(--border-radius-small)] border border-transparent bg-primary text-white text-[10px] font-semibold shadow-[0_4px_12px_rgba(27,54,93,0.22)] hover:bg-[#162f4f] hover:shadow-[0_8px_18px_rgba(27,54,93,0.28)] transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <WandSparkles size={12} strokeWidth={2} className="text-white/90" />
+                    <span>{topicBusy ? "Generating..." : "Generate topic"}</span>
+                  </button>
+                </div>
+
+                {promptOptions.length > 0 ? (
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    {promptOptions.slice(0, 4).map((item, idx) => {
+                      const selected = idx === selectedPromptOptionIndex;
+                      return (
+                        <button
+                          key={`${idx}-${item}`}
+                          type="button"
+                          onClick={() => onSelectPromptOption(item, idx)}
+                          title={item}
+                          className={`rounded-[var(--border-radius-small)] border px-3 py-2 text-left text-[12px] leading-5 transition-colors ${selected
+                              ? "border-[color:var(--primary-color)] bg-[color:var(--primary-selected-color)] text-primary"
+                              : "border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-secondary hover:border-[color:var(--primary-color)] hover:text-primary"
+                            }`}
+                        >
+                          {truncatePromptPreview(item)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
               </section>
             </div>
           </section>
@@ -533,11 +586,10 @@ export const RunSetupPanel = ({
                             key={preset.id}
                             type="button"
                             onClick={() => onStylePresetIdChange(preset.id)}
-                            className={`flex flex-col items-center gap-2 p-2 rounded-[var(--border-radius-medium)] border-2 transition-all text-left ${
-                              isSelected
+                            className={`flex flex-col items-center gap-2 p-2 rounded-[var(--border-radius-medium)] border-2 transition-all text-left ${isSelected
                                 ? "border-primary bg-primary/5 shadow-sm"
                                 : "border-transparent bg-[color:var(--secondary-background-color)] hover:border-border-warm/70"
-                            }`}
+                              }`}
                           >
                             <span className={`text-[11px] font-semibold text-center leading-tight ${isSelected ? "text-primary" : "text-secondary"}`}>
                               {preset.label}
@@ -618,7 +670,7 @@ export const RunSetupPanel = ({
                   </button>
                 </div>
               </div>
-              
+
               <ReferenceGallery
                 assets={referenceAssets.filter(a => modalTab === "generated" ? a.source === "graphic_generated" : a.source === "upload")}
                 selectedIds={selectedReferenceAssetIds}
@@ -629,7 +681,7 @@ export const RunSetupPanel = ({
                 maxSelectable={14}
                 mode="select"
               />
-              
+
               <div className="mt-6 flex justify-end border-t border-[color:var(--ui-border-color)] pt-4">
                 <Button variant="primary" onClick={() => setIsReferenceModalOpen(false)}>
                   Done

@@ -54,6 +54,13 @@ const postToTeamsSchema = z.object({
   recipientEmails: z.array(z.string().email()).min(1)
 });
 
+const runPromptSchema = z.object({
+  category: z.enum(CATEGORIES),
+  tone: z.enum(TONES),
+  topicHint: z.string().max(2400).optional(),
+  stylePresetId: z.string().optional()
+});
+
 export const registerRunRoutes: RouteRegistrar = (app, deps) => {
   app.post("/api/runs/daily", async (request, reply) => {
     const parsed = dailySchema.safeParse(request.body ?? {});
@@ -73,6 +80,15 @@ export const registerRunRoutes: RouteRegistrar = (app, deps) => {
 
     const run = await deps.runService.createManualRun(parsed.data);
     return reply.status(202).send(run);
+  });
+
+  app.post("/api/runs/generate-prompts", async (request, reply) => {
+    const parsed = runPromptSchema.safeParse(request.body ?? {});
+    if (!parsed.success) {
+      return reply.status(400).send({ error: parsed.error.flatten() });
+    }
+    const prompts = await deps.runPromptService.generatePrompts(parsed.data);
+    return reply.status(200).send({ prompts });
   });
 
   app.get("/api/runs", async () => {

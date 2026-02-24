@@ -10,8 +10,11 @@ import type {
   ManualRunRequest,
   Run,
   RetryStepRequest,
-  PostToTeamsRequest
+  PostToTeamsRequest,
+  RunPromptGenerateRequest,
+  RunPromptGenerateResponse
 } from "@marketing/shared";
+
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 export interface TeamsDefaults {
@@ -166,7 +169,19 @@ export const apiClient = {
     return parseJson<GraphicTopicGenerateResponse>(response);
   },
 
+  async generateRunPrompts(payload: RunPromptGenerateRequest): Promise<RunPromptGenerateResponse> {
+    const response = await fetch(`${API_BASE}/api/runs/generate-prompts`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+    return parseJson<RunPromptGenerateResponse>(response);
+  },
+
   createEventSource(): EventSource {
     return new EventSource(`${API_BASE}/api/events`);
   }
 };
+

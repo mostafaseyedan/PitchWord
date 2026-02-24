@@ -215,6 +215,17 @@ export interface GraphicTopicGenerateResponse {
   prompts: string[];
 }
 
+export interface RunPromptGenerateRequest {
+  category: Category;
+  tone: Tone;
+  topicHint?: string;
+  stylePresetId?: string;
+}
+
+export interface RunPromptGenerateResponse {
+  prompts: string[];
+}
+
 export interface AnalyticsSummary {
   totalRuns: number;
   successRate: number;
