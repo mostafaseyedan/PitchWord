@@ -25,11 +25,26 @@ const dailySchema = z.object({
   referenceAssetIds: z.array(z.string()).max(14).optional()
 });
 
+const citationSchema = z.object({
+  sourceUrl: z.string(),
+  snippet: z.string(),
+  confidence: z.number()
+});
+
+const contentDraftSchema = z.object({
+  title: z.string(),
+  body: z.string(),
+  painPoints: z.array(z.string()),
+  citations: z.array(citationSchema),
+  category: z.enum(CATEGORIES)
+});
+
 const manualSchema = z.object({
   tone: z.enum(TONES),
   category: z.enum(CATEGORIES),
   input: z.object({
     manualIdeaText: z.string().optional(),
+    preselectedDraft: contentDraftSchema.optional(),
     uploadedFileRefs: z.array(z.string()).default([]),
     requestedMedia: z.enum(["image_only", "image_video"]),
     selectedNewsTopic: z.string().optional(),

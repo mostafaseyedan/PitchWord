@@ -19,7 +19,8 @@ import { ColorSwatchStrip, renderFontPreviewLabel } from "../common/DropdownPrev
 import { InputField } from "../common/InputField";
 import { TextAreaField } from "../common/TextAreaField";
 import { ReferenceGallery } from "../common/ReferenceGallery";
-import { colorSchemeOptions, fontPresetOptions, stylePresetOptions } from "../../config/visual-presets";
+import { colorSchemeOptions, fontPresetOptions, graphicStylePresetOptions, stylePresetOptions } from "../../config/visual-presets";
+import { graphicStylePreviewById, renderGraphicStylePreviewScene } from "../../config/graphic-style-previews";
 
 interface RunSetupPanelProps {
   tone: Tone;
@@ -154,6 +155,7 @@ const contentStylePreviewById: Record<string, ContentStylePreview> = {
     description: "Polished neutral surfaces, restrained geometry, and conservative contrast.",
     background: "linear-gradient(135deg, #EEF1F5 0%, #DDE3EA 100%)",
     accent: "#3D5268",
+    imageUrl: "/images/presets/minimal_corporate.png",
     kind: "minimal_corporate"
   },
   isometric_technical: {
@@ -161,6 +163,7 @@ const contentStylePreviewById: Record<string, ContentStylePreview> = {
     description: "Structured isometric modules with technical line rhythm and depth.",
     background: "linear-gradient(135deg, #ECF5FB 0%, #DCEBF7 100%)",
     accent: "#2A6EA0",
+    imageUrl: "/images/presets/isometric_technical.png",
     kind: "isometric_technical"
   },
   cinematic_enterprise: {
@@ -184,6 +187,7 @@ const contentStylePreviewById: Record<string, ContentStylePreview> = {
     description: "Hero object spotlight with premium framing and controlled reflections.",
     background: "linear-gradient(135deg, #F6F2EE 0%, #EDE3D9 100%)",
     accent: "#8A5A2E",
+    imageUrl: "/images/presets/product_showcase.png",
     kind: "product_showcase"
   }
 };
@@ -455,8 +459,8 @@ export const RunSetupPanel = ({
                           onClick={() => onSelectPromptOption(item, idx)}
                           title={item}
                           className={`rounded-[var(--border-radius-small)] border px-3 py-2 text-left text-[12px] leading-5 transition-colors ${selected
-                              ? "border-[color:var(--primary-color)] bg-[color:var(--primary-selected-color)] text-primary"
-                              : "border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-secondary hover:border-[color:var(--primary-color)] hover:text-primary"
+                            ? "border-[color:var(--primary-color)] bg-[color:var(--primary-selected-color)] text-primary"
+                            : "border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-secondary hover:border-[color:var(--primary-color)] hover:text-primary"
                             }`}
                         >
                           {truncatePromptPreview(item)}
@@ -578,8 +582,11 @@ export const RunSetupPanel = ({
                   <div className="md:col-span-2">
                     <label className="field-label">Style Preset</label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mt-2">
-                      {stylePresetOptions.map((preset) => {
-                        const preview = contentStylePreviewById[preset.id];
+                      {[...stylePresetOptions, ...graphicStylePresetOptions].map((preset) => {
+                        const contentPreview = contentStylePreviewById[preset.id];
+                        const graphicPreview = graphicStylePreviewById[preset.id];
+                        const background = contentPreview?.background ?? graphicPreview?.background;
+                        const hasImage = !!(contentPreview?.imageUrl ?? graphicPreview?.imageUrl);
                         const isSelected = stylePresetId === preset.id;
                         return (
                           <button
@@ -587,18 +594,19 @@ export const RunSetupPanel = ({
                             type="button"
                             onClick={() => onStylePresetIdChange(preset.id)}
                             className={`flex flex-col items-center gap-2 p-2 rounded-[var(--border-radius-medium)] border-2 transition-all text-left ${isSelected
-                                ? "border-primary bg-primary/5 shadow-sm"
-                                : "border-transparent bg-[color:var(--secondary-background-color)] hover:border-border-warm/70"
+                              ? "border-primary bg-primary/5 shadow-sm"
+                              : "border-transparent bg-[color:var(--secondary-background-color)] hover:border-border-warm/70"
                               }`}
                           >
                             <span className={`text-[11px] font-semibold text-center leading-tight ${isSelected ? "text-primary" : "text-secondary"}`}>
                               {preset.label}
                             </span>
                             <div
-                              className={`w-full aspect-video rounded-[var(--border-radius-small)] border border-[color:var(--ui-border-color)] overflow-hidden ${preview?.imageUrl ? "p-0" : "p-2"}`}
-                              style={{ background: preview?.background }}
+                              className={`w-full rounded-[var(--border-radius-small)] border border-[color:var(--ui-border-color)] overflow-hidden ${hasImage ? "p-0" : "aspect-video p-2"}`}
+                              style={{ background }}
                             >
-                              {preview ? renderContentStylePreviewScene(preview) : null}
+                              {contentPreview ? renderContentStylePreviewScene(contentPreview) : null}
+                              {graphicPreview ? renderGraphicStylePreviewScene(graphicPreview) : null}
                             </div>
                           </button>
                         );

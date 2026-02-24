@@ -83,7 +83,7 @@ const start = async (): Promise<void> => {
   const mediaStorageService = new MediaStorageService();
   const graphicGenerationService = new GraphicGenerationService(libraryService);
   const graphicTopicService = new GraphicTopicService();
-  const runPromptService = new RunPromptService();
+  const runPromptService = new RunPromptService(newsHunterService, contentCreatorService);
   const teamsDeliveryService = new TeamsDeliveryService();
   const uploadService = new UploadService();
   const settingsService = new AppSettingsService();

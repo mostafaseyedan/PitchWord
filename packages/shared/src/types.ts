@@ -117,6 +117,7 @@ export interface TeamsDelivery {
 
 export interface RunInput {
   manualIdeaText?: string;
+  preselectedDraft?: ContentDraft;
   uploadedFileRefs: string[];
   referenceAssetIds?: string[];
   requestedMedia: "image_only" | "image_video";

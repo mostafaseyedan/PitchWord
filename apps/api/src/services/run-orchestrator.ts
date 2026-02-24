@@ -18,6 +18,7 @@ import { TeamsDeliveryService } from "./teams-delivery-service.js";
 import { VertexContextService } from "./vertex-context-service.js";
 import { VideoAgentService } from "./video-agent-service.js";
 import { MediaStorageService } from "./media-storage-service.js";
+import { defaultGroundedQueryByCategory } from "../agents/prompts/category-queries.js";
 import { createId } from "../utils/id.js";
 import { nowIso } from "../utils/time.js";
 
@@ -51,7 +52,7 @@ export class RunOrchestrator {
           const manualIdea = run.input.manualIdeaText?.trim();
 
           if (run.category !== "industry_news") {
-            const query = manualIdea || selectedTopic || this.defaultGroundedQueryByCategory(run.category);
+            const query = manualIdea || selectedTopic || defaultGroundedQueryByCategory(run.category);
             return this.newsHunterService.discoverFromDatastore(query, run.tone, run.category);
           }
 
@@ -109,6 +110,17 @@ export class RunOrchestrator {
         run.id,
         "content_creator",
         async () => {
+          if (run.input.preselectedDraft) {
+            return {
+              result: run.input.preselectedDraft,
+              meta: {
+                model: "none",
+                prompt: "",
+                rawResponseText: undefined as string | undefined,
+                systemInstruction: "content_creator bypassed: preselectedDraft from HITL selection"
+              }
+            };
+          }
           return this.contentCreatorService.generateDraft({
             tone: run.tone,
             category: run.category,
@@ -512,7 +524,7 @@ export class RunOrchestrator {
   private buildGroundedTopicForNonNewsCategory(run: Run): { topic: string; summary: string } {
     const manualIdea = run.input.manualIdeaText?.trim();
     const selectedTopic = run.input.selectedNewsTopic?.trim();
-    const categoryQuery = this.defaultGroundedQueryByCategory(run.category);
+    const categoryQuery = defaultGroundedQueryByCategory(run.category);
     const topic = manualIdea || selectedTopic || categoryQuery;
 
     const summary = manualIdea
@@ -524,28 +536,6 @@ export class RunOrchestrator {
     return { topic, summary };
   }
 
-  private defaultGroundedQueryByCategory(category: Run["category"]): string {
-    switch (category) {
-      case "customer_pain_point":
-        return "What are the biggest IT and ERP challenges enterprise clients face when managing operations without a managed services partner?";
-      case "company_update":
-        return "What recent projects, client wins, or delivery milestones has Cendien completed in ITSM, Microsoft, or Infor?";
-      case "hiring":
-        return "What roles is Cendien hiring for and what skills are needed for ITSM, Microsoft, and Infor consulting?";
-      case "product_education":
-        return "How do enterprises improve ITSM workflows, Microsoft ecosystem adoption, or Infor ERP configuration?";
-      case "infor":
-        return "How are enterprises modernizing Infor ERP systems and what integration challenges do they face?";
-      case "team":
-        return "Who are the key consultants and experts at Cendien and what delivery capabilities do they bring?";
-      case "industry_news":
-        return "What recent enterprise technology developments affect ITSM, Microsoft, and Infor markets?";
-      default: {
-        const exhaustive: never = category;
-        return exhaustive;
-      }
-    }
-  }
 
   private defaultGroundedSummaryByCategory(category: Run["category"]): string {
     switch (category) {

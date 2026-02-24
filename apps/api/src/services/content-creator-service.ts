@@ -132,6 +132,90 @@ export class ContentCreatorService {
     };
   }
 
+  async generateDrafts(input: ContentInput, count: number): Promise<ContentDraft[]> {
+    if (!this.ai) {
+      throw new Error("Vertex client is required. Set VERTEX_GCLOUD_PROJECT for grounded content generation.");
+    }
+
+    const systemInstruction = [
+      "You are a senior B2B marketing strategist and copywriter for Cendien.",
+      CENDIEN_CONTEXT,
+      CENDIEN_CONTENT_GOAL,
+      "All output must be written as Cendien-branded thought leadership for enterprise decision-makers.",
+      "Do not produce generic content detached from Cendien positioning.",
+      "Grounding policy: The answer must be based on Grounded data from the configured grounding tool.",
+      "Do not invent sources, claims, or citations."
+    ].join(" ");
+
+    const painPointContext = buildPainPointContext();
+
+    const prompt = [
+      "You are a B2B marketing writer for Cendien.",
+      tonePromptByTone[input.tone],
+      categoryGuidance[input.category],
+      `Topic: ${input.newsTopic}`,
+      `Summary: ${input.newsSummary}`,
+      input.manualIdeaText ? `Manual user idea: ${input.manualIdeaText}` : "",
+      `Grounding context: ${input.groundingSnippet}`,
+      `Citations input: ${JSON.stringify(input.citations)}`,
+      "",
+      "=== Buyer Pain Points (use these to frame the post) ===",
+      "Connect the topic to one or more of these real buyer pain points. Use the buyer's own language when possible.",
+      painPointContext,
+      "",
+      "The painPoints field in each object must reference specific pain points from the list above.",
+      "",
+      "Grounding requirement: You must use grounding tool results and prioritize those facts.",
+      "Length requirement: 1 title and max 3 lines of body text per variation. Keep it extremely concise.",
+      "Title requirement: include the exact word 'Cendien' in every title.",
+      `Output format contract (strict): return ONLY a JSON array of exactly ${count} objects and nothing else.`,
+      `Each object must use exactly this shape: {"title":"string","body":"string","painPoints":["string"],"category":"string"}`,
+      `Category must be exactly: "${input.category}" in every object.`,
+      "Each variation must have a meaningfully different angle, framing, or emphasis.",
+      "Do not wrap in markdown. Do not use code fences. Do not add commentary."
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const response = await this.ai.models.generateContent({
+      model: env.GEMINI_TEXT_MODEL,
+      contents: prompt,
+      config: {
+        tools: buildGroundingTools() as any,
+        systemInstruction,
+        temperature: 1,
+        maxOutputTokens: 5000
+      }
+    });
+
+    const text = this.extractText(response);
+    if (!text) {
+      throw new Error("Gemini returned empty response for content drafts.");
+    }
+
+    const groundedCitations = extractGroundingCitations(response);
+    const citations = groundedCitations.length > 0 ? this.mergeCitations(groundedCitations) : [];
+
+    const parsed = this.tryParseJsonArray(text);
+    const items: Record<string, any>[] = Array.isArray(parsed) && parsed.length > 0
+      ? parsed
+      : [this.tryParseJson(text) ?? {}];
+
+    return items.slice(0, count).map((item) => ({
+      title: this.ensureCendienInTitle(
+        String(item?.title ?? this.inferTitleFromText(text) ?? "Cendien market signal your buyers are reacting to this week")
+      ),
+      body: String(item?.body ?? this.fallbackBodyFromText(text, input.newsSummary)),
+      painPoints: Array.isArray(item?.painPoints)
+        ? item.painPoints.map((v: unknown) => String(v))
+        : ["Slow execution", "Unclear ROI"],
+      citations,
+      category: typeof item?.category === "string" && item.category.trim().length > 0
+        ? (item.category.trim() as Category)
+        : input.category
+    }));
+  }
+
   private ensureCendienInTitle(title: string): string {
     const normalized = title.trim();
     if (!normalized) {
@@ -235,6 +319,23 @@ export class ContentCreatorService {
       }
     }
 
+    return undefined;
+  }
+
+  private tryParseJsonArray(text: string): Record<string, any>[] | undefined {
+    if (!text.trim()) return undefined;
+    try {
+      const result = JSON.parse(text);
+      if (Array.isArray(result)) return result;
+    } catch {
+      const candidate = text.match(/\[[\s\S]*\]/)?.[0];
+      if (candidate) {
+        try {
+          const result = JSON.parse(candidate);
+          if (Array.isArray(result)) return result;
+        } catch { /* fall through */ }
+      }
+    }
     return undefined;
   }
 

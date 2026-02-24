@@ -8,7 +8,7 @@ import { env } from "../config/env.js";
 import { createId } from "../utils/id.js";
 import { nowIso } from "../utils/time.js";
 import { LibraryService } from "./library-service.js";
-import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, getResolvedStyleHint, STYLE_PRESETS } from "./visual-presets.js";
+import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, getResolvedStyleHint, GRAPHIC_STYLE_PRESETS, STYLE_PRESETS } from "./visual-presets.js";
 
 const defaultLogoPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -66,7 +66,8 @@ export class ImageAgentService {
       category === "infor"
         ? "Infor branding is allowed in this category, but keep it secondary and tasteful beside Cendien branding."
         : "Do not include Infor logo, Infor wordmark, or any third-party brand logos. Only Cendien branding is allowed.";
-    const stylePresetHint = getResolvedStyleHint(STYLE_PRESETS, input.stylePresetId, input.fontPresetId, input.colorSchemeId);
+    const stylePresetHint = getResolvedStyleHint(STYLE_PRESETS, input.stylePresetId, input.fontPresetId, input.colorSchemeId)
+      ?? getPresetHint(GRAPHIC_STYLE_PRESETS, input.stylePresetId);
     const fontPresetHint = getPresetHint(FONT_PRESETS, input.fontPresetId);
     const colorSchemeHint = getPresetHint(COLOR_SCHEMES, input.colorSchemeId);
     const styleLine = userStyleOverride

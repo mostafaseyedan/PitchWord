@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import type {
   AspectRatio,
   Category,
+  ContentDraft,
   ImageResolution,
   LibraryAsset,
   ManualRunRequest,
@@ -166,11 +167,23 @@ function App() {
   };
 
   const handleManualRun = async (): Promise<void> => {
+    let preselectedDraft: ContentDraft | undefined;
+    if (selectedRunPromptOptionIndex !== null) {
+      const selectedPrompt = runPromptOptions[selectedRunPromptOptionIndex];
+      if (selectedPrompt) {
+        const sepIndex = selectedPrompt.indexOf("\n\n");
+        const title = sepIndex >= 0 ? selectedPrompt.slice(0, sepIndex) : selectedPrompt;
+        const body = sepIndex >= 0 ? selectedPrompt.slice(sepIndex + 2) : "";
+        preselectedDraft = { title, body, painPoints: [], citations: [], category };
+      }
+    }
+
     const payload: ManualRunRequest = {
       tone,
       category,
       input: {
         manualIdeaText: manualIdeaText || undefined,
+        preselectedDraft,
         selectedNewsTopic: selectedNewsTopic || undefined,
         uploadedFileRefs: [],
         referenceAssetIds: selectedReferenceAssetIds,
