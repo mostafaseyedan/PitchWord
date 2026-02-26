@@ -9,8 +9,10 @@ import type {
 } from "@marketing/shared";
 import { env } from "../config/env.js";
 import type { RunRepository } from "../repositories/run-repository.js";
+import { AppEventBus } from "../events/event-bus.js";
 import { InMemoryJobQueue } from "./job-queue.js";
 import { RunOrchestrator } from "./run-orchestrator.js";
+import { MediaStorageService } from "./media-storage-service.js";
 
 const isTone = (value: string): value is Tone =>
   ["professional", "urgent_hiring", "educational", "sales_focused", "funny", "engaging", "casual", "absurd"].includes(value);
@@ -24,8 +26,10 @@ export class RunService {
   constructor(
     private readonly repository: RunRepository,
     private readonly queue: InMemoryJobQueue,
-    private readonly orchestrator: RunOrchestrator
-  ) {}
+    private readonly orchestrator: RunOrchestrator,
+    private readonly mediaStorageService: MediaStorageService,
+    private readonly events: AppEventBus
+  ) { }
 
   async createDailyRun(payload: DailyRunRequest): Promise<Run> {
     const tone = isTone(payload.tone ?? "") ? payload.tone! : (env.DEFAULT_TONE as Tone);
@@ -81,5 +85,11 @@ export class RunService {
 
   async postToTeams(runId: string, request: PostToTeamsRequest): Promise<Run> {
     return this.orchestrator.postToTeams(runId, request);
+  }
+
+  async deleteRun(runId: string): Promise<void> {
+    await this.mediaStorageService.deleteRunAssets(runId);
+    await this.repository.deleteRun(runId);
+    this.events.emit("event", { type: "run_deleted", payload: { id: runId } });
   }
 }

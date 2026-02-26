@@ -242,7 +242,8 @@ h3 {
 
 .workspace-shell {
   display: flex;
-  min-height: calc(100vh - var(--topbar-height));
+  height: calc(100vh - var(--topbar-height));
+  overflow: hidden;
   position: relative;
   z-index: 1;
 }
@@ -287,6 +288,7 @@ h3 {
 }
 
 .workspace-side-list {
+  flex: 1;
   min-height: 0;
   overflow-y: auto;
   background: #ffffff;
@@ -295,12 +297,27 @@ h3 {
   padding: 0;
   margin-inline: -1rem;
   box-shadow: none;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.8 0.02 245 / 0.4) transparent;
 }
 
+/* Premium styled scrollbar for side rails */
 .workspace-side-list::-webkit-scrollbar {
-  display: none;
+  width: 5px;
+  display: block;
+}
+
+.workspace-side-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.workspace-side-list::-webkit-scrollbar-thumb {
+  background: oklch(0.8 0.02 245 / 0.4);
+  border-radius: 20px;
+}
+
+.workspace-side-list::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.7 0.03 245 / 0.6);
 }
 
 .workspace-content {

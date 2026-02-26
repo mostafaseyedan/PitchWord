@@ -74,16 +74,23 @@ export class ImageAgentService {
       ? `Additional style override from user: ${userStyleOverride}`
       : "";
 
-    const prompt = [
+    const promptParts = [
       "Create an enterprise marketing visual for Cendien.",
       CENDIEN_CONTEXT,
       `Title: ${brandedTitle}`,
       `Body context: ${draft.body}`,
       draft.painPoints.length > 0 ? `Target pain points: ${draft.painPoints.join(" | ")}` : "",
-      stylePresetHint ? `Style preset: ${stylePresetHint}` : "Style preset: professional enterprise marketing visual.",
-      fontPresetHint ? `Font preset: ${fontPresetHint}` : "",
-      colorSchemeHint ? `Color scheme preset: ${colorSchemeHint}` : "",
-      styleLine,
+    ];
+
+    if (userStyleOverride) {
+      promptParts.push(`Visual Design Instructions (CRITICAL OVERRIDE): ${userStyleOverride}`);
+    } else {
+      promptParts.push(stylePresetHint ? `Style preset: ${stylePresetHint}` : "Style preset: professional enterprise marketing visual.");
+      if (fontPresetHint) promptParts.push(`Font preset: ${fontPresetHint}`);
+      if (colorSchemeHint) promptParts.push(`Color scheme preset: ${colorSchemeHint}`);
+    }
+
+    promptParts.push(
       categoryContext,
       brandGuard,
       "Use the provided Cendien logo as a visual reference and integrate it delicately.",
@@ -92,7 +99,9 @@ export class ImageAgentService {
       "If any headline/title text appears in the image, it must include the exact word 'Cendien'.",
       `Aspect ratio: ${input.aspectRatio}`,
       `Resolution preference: ${input.imageResolution}`
-    ].join("\n");
+    );
+
+    const prompt = promptParts.filter(Boolean).join("\n");
 
     const model = env.GEMINI_IMAGE_MODEL;
     const modelClient = this.ai.models as any;

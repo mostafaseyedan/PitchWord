@@ -366,6 +366,24 @@ export class MediaStorageService {
     return "unknown";
   }
 
+  async deleteRunAssets(runId: string): Promise<void> {
+    if (!this.bucketName) return;
+
+    const bucket = this.storage.bucket(this.bucketName);
+    const prefixes = [`${this.prefix}/image/${runId}/`, `${this.prefix}/video/${runId}/`];
+
+    for (const prefix of prefixes) {
+      try {
+        const [files] = await bucket.getFiles({ prefix });
+        if (files.length > 0) {
+          await Promise.all(files.map((file) => file.delete({ ignoreNotFound: true })));
+        }
+      } catch (error) {
+        console.warn(`Failed to delete assets for run ${runId} with prefix ${prefix}:`, error);
+      }
+    }
+  }
+
   private normalizePrefix(prefix: string): string {
     const trimmed = prefix.trim().replace(/^\/+|\/+$/g, "");
     return trimmed || "marketing-media";

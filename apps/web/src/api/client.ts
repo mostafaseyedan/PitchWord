@@ -62,6 +62,13 @@ export const apiClient = {
     return parseJson<Run>(response);
   },
 
+  async deleteRun(runId: string): Promise<{ deleted: boolean }> {
+    const response = await fetch(`${API_BASE}/api/runs/${runId}`, {
+      method: "DELETE"
+    });
+    return parseJson<{ deleted: boolean }>(response);
+  },
+
   async listLogs(runId?: string): Promise<AgentStepLog[]> {
     const url = runId ? `${API_BASE}/api/logs?runId=${encodeURIComponent(runId)}` : `${API_BASE}/api/logs`;
     const response = await fetch(url);

@@ -30,4 +30,5 @@ export interface RunRepository {
   getLatestLogForStep(runId: string, step: AgentStepName): Promise<AgentStepLog | undefined>;
   getAnalyticsSummary(): Promise<AnalyticsSummary>;
   recoverStaleRuns(): Promise<number>;
+  deleteRun(runId: string): Promise<void>;
 }

@@ -1,8 +1,8 @@
+import { useEffect } from "react";
 import type { Run } from "@marketing/shared";
 import { motion, AnimatePresence } from "framer-motion";
 import { StatusPill } from "../common/StatusPill";
 import { ProgressBar } from "../common/ProgressBar";
-import { Button } from "../common/Button";
 import { CheckCircle2 } from "lucide-react";
 import { statusProgress, formatDate } from "../../utils/format";
 
@@ -12,6 +12,23 @@ interface LiveWorkspacePanelProps {
 }
 
 export const LiveWorkspacePanel = ({ selectedRun, onShowResult }: LiveWorkspacePanelProps) => {
+  useEffect(() => {
+    if (selectedRun?.status === "review_ready" || selectedRun?.status === "posted") {
+      const hasImage = selectedRun.assets.some(a => a.type === "image");
+      const needsVideo = selectedRun.input.requestedMedia === "image_video";
+      const hasVideo = selectedRun.assets.some(a => a.type === "video");
+
+      const assetsReady = hasImage && (!needsVideo || hasVideo);
+
+      if (assetsReady) {
+        const timer = setTimeout(() => {
+          onShowResult();
+        }, 1200);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [selectedRun?.status, selectedRun?.assets, selectedRun?.input.requestedMedia, onShowResult]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -51,15 +68,6 @@ export const LiveWorkspacePanel = ({ selectedRun, onShowResult }: LiveWorkspaceP
 
           <ProgressBar value={statusProgress[selectedRun.status]} />
 
-          <div className="flex justify-center mt-4 mb-8">
-            <Button
-              variant="espresso"
-              onClick={onShowResult}
-              disabled={selectedRun.status === "failed"}
-            >
-              Show result
-            </Button>
-          </div>
 
           {selectedRun.newsTopic ? (
             <div className="mt-8 pt-8 border-t border-border-warm/30">

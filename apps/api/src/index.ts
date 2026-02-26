@@ -117,7 +117,7 @@ const start = async (): Promise<void> => {
     }
   });
 
-  const runService = new RunService(runRepository, queue, orchestrator);
+  const runService = new RunService(runRepository, queue, orchestrator, mediaStorageService, events);
 
   const routeDeps = {
     runService,

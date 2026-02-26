@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type {
   AspectRatio,
@@ -24,6 +24,13 @@ import { AlertBanner } from "./components/common/AlertBanner";
 import { Spinner } from "./components/common/Spinner";
 import { Button } from "./components/common/Button";
 import { GraphicGenerationPanel } from "./components/dashboard/GraphicGenerationPanel";
+import {
+  colorSchemeOptions,
+  fontPresetOptions,
+  graphicStylePresetOptions,
+  resolveStyleHint,
+  stylePresetOptions
+} from "./config/visual-presets";
 import "./styles/app.css";
 
 type PaneView = "run_setup" | "graphics" | "analytics" | "publishing" | "active_stream";
@@ -33,6 +40,13 @@ function App() {
 
   const [paneView, setPaneView] = useState<PaneView>("run_setup");
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+  const contentRef = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [paneView, selectedRunId]);
 
   const [tone, setTone] = useState<Tone>("professional");
   const [category, setCategory] = useState<Category>("industry_news");
@@ -69,6 +83,29 @@ function App() {
 
   const [busy, setBusy] = useState(false);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const allPresets = [...stylePresetOptions, ...graphicStylePresetOptions];
+    const style = allPresets.find((p) => p.id === stylePresetId);
+    const font = fontPresetOptions.find((p) => p.id === fontPresetId);
+    const color = colorSchemeOptions.find((p) => p.id === colorSchemeId);
+
+    if (style && style.promptHint) {
+      const resolved = resolveStyleHint(style.promptHint, font, color);
+      setImageStyleInstruction(resolved);
+    }
+  }, [stylePresetId, fontPresetId, colorSchemeId]);
+
+  useEffect(() => {
+    const style = graphicStylePresetOptions.find((p) => p.id === graphicStylePresetId);
+    const font = fontPresetOptions.find((p) => p.id === fontPresetId);
+    const color = colorSchemeOptions.find((p) => p.id === colorSchemeId);
+
+    if (style && style.promptHint) {
+      const resolved = resolveStyleHint(style.promptHint, font, color);
+      setGraphicStyleOverride(resolved);
+    }
+  }, [graphicStylePresetId, fontPresetId, colorSchemeId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -158,7 +195,7 @@ function App() {
       });
       setActiveRunId(run.id);
       setSelectedRunId(run.id);
-      setPaneView("publishing");
+      setPaneView("active_stream");
     } catch (runError) {
       setError(runError instanceof Error ? runError.message : String(runError));
       setBusy(false);
@@ -261,11 +298,26 @@ function App() {
   };
 
   const handleLibraryDelete = async (assetId: string): Promise<void> => {
+    if (!confirm("Permanently delete this asset?")) return;
     try {
       setBusy(true);
       await apiClient.deleteLibraryAsset(assetId);
       await refreshLibraryAssets();
       setSelectedReferenceAssetIds((current) => current.filter((id) => id !== assetId));
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : String(deleteError));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDeleteRun = async (runId: string): Promise<void> => {
+    try {
+      setBusy(true);
+      await apiClient.deleteRun(runId);
+      if (selectedRunId === runId) {
+        setSelectedRunId(null);
+      }
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : String(deleteError));
     } finally {
@@ -408,11 +460,12 @@ function App() {
               runs={runs}
               selectedRunId={selectedRunId}
               onSelectRun={handleSelectRun}
+              onDeleteRun={handleDeleteRun}
             />
           </div>
         </aside>
 
-        <section className="workspace-content">
+        <section ref={contentRef} className="workspace-content">
           {error ? (
             <AlertBanner type="error" onClose={() => setError(null)}>
               {error}

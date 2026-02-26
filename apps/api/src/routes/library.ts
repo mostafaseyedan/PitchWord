@@ -3,18 +3,18 @@ import { ASPECT_RATIOS, IMAGE_RESOLUTIONS } from "@marketing/shared";
 import type { RouteRegistrar } from "./types.js";
 
 const graphicSchema = z.object({
-  prompt: z.string().min(1).max(2400),
+  prompt: z.string().min(1).max(8000),
   aspectRatio: z.enum(ASPECT_RATIOS).default("16:9"),
   imageResolution: z.enum(IMAGE_RESOLUTIONS).default("1K"),
   stylePresetId: z.string().optional(),
-  styleOverride: z.string().max(2400).optional(),
+  styleOverride: z.string().max(8000).optional(),
   fontPresetId: z.string().optional(),
   colorSchemeId: z.string().optional(),
   referenceAssetIds: z.array(z.string()).max(14).default([])
 });
 
 const graphicTopicSchema = z.object({
-  topicHint: z.string().max(2400).optional()
+  topicHint: z.string().max(8000).optional()
 });
 
 export const registerLibraryRoutes: RouteRegistrar = (app, deps) => {

@@ -4,6 +4,7 @@ import { Button } from "../common/Button";
 import { X, Mail } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { colorSchemeOptions, fontPresetOptions, stylePresetOptions, graphicStylePresetOptions } from "../../config/visual-presets";
 
 const EMAIL_DOMAIN = "@cendien.com";
 
@@ -226,13 +227,49 @@ export const PreviewDeliveryPanel = ({
                 </div>
               ))}
 
-              {selectedRun?.draft && (
+              {selectedRun && (
                 <div className="w-full max-w-[560px]">
-                  <div className="p-5 rounded-[var(--border-radius-medium)] bg-sage/5 border border-sage/10">
-                    <div className="text-[10px] font-bold text-sage tracking-[0.2em] mb-2">Category</div>
-                    <p className="text-[15px] font-medium text-primary leading-snug capitalize">
-                      {selectedRun.draft.category.replace(/_/g, " ")}
-                    </p>
+                  <div className="p-6 rounded-[var(--border-radius-medium)] bg-sage/5 border border-sage/10 shadow-sm">
+                    <div className="text-[11px] font-bold text-sage tracking-[0.2em] mb-4 uppercase opacity-80 border-b border-sage/10 pb-2">
+                      Run Configuration
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-y-4 gap-x-6">
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Strategy</div>
+                        <p className="text-[14px] font-semibold text-primary capitalize">
+                          {selectedRun.category.replace(/_/g, " ")} • {selectedRun.tone}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Format</div>
+                        <p className="text-[14px] font-semibold text-primary">
+                          {selectedRun.input.aspectRatio} ({selectedRun.input.requestedMedia === "image_only" ? "Image" : "Image + Video"})
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Style Preset</div>
+                        <p className="text-[13px] font-medium text-secondary">
+                          {[...stylePresetOptions, ...graphicStylePresetOptions].find(p => p.id === selectedRun.input.stylePresetId)?.label || "None"}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Typography</div>
+                        <p className="text-[13px] font-medium text-secondary">
+                          {fontPresetOptions.find(p => p.id === selectedRun.input.fontPresetId)?.label || "Default"}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1 col-span-2">
+                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Color Scheme</div>
+                        <p className="text-[13px] font-medium text-secondary">
+                          {colorSchemeOptions.find(p => p.id === selectedRun.input.colorSchemeId)?.label || "Standard"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -250,7 +287,7 @@ export const PreviewDeliveryPanel = ({
                     }}
                     className="absolute top-0 right-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--border-radius-small)] border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-[11px] font-semibold text-secondary hover:text-primary hover:border-[color:var(--primary-color)] transition-colors"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
                     Copy Content
                   </button>
                   <div>
@@ -259,9 +296,18 @@ export const PreviewDeliveryPanel = ({
                   </div>
 
                   <div>
-                    <div className="text-label-small mb-3 opacity-50 tracking-[0.1em]">Deep dive body</div>
+                    <div className="text-label-small mb-3 opacity-50 tracking-[0.1em]">Topic</div>
                     <p className="body-md whitespace-pre-wrap">{selectedRun.draft.body}</p>
                   </div>
+
+                  {selectedRun?.input?.imageStyleInstruction && (
+                    <div className="p-6 rounded-[var(--border-radius-medium)] bg-primary/5 border border-primary/10 shadow-sm transition-all hover:bg-primary/[0.07]">
+                      <div className="text-label-small mb-3 opacity-50 tracking-[0.1em]">Visual instruction used</div>
+                      <p className="text-[14px] text-primary/80 leading-relaxed font-semibold italic">
+                        "{selectedRun.input.imageStyleInstruction}"
+                      </p>
+                    </div>
+                  )}
 
                   {selectedRun.draft.painPoints.length > 0 && (
                     <div className="p-6 rounded-[var(--border-radius-medium)] bg-white/40">
@@ -357,11 +403,19 @@ export const PreviewDeliveryPanel = ({
                 Close (ESC)
               </button>
               {viewerAsset.type === "image" ? (
-                <img
-                  src={viewerAsset.uri}
-                  alt="Full view"
-                  className="max-w-full max-h-[85vh] object-contain rounded-[var(--border-radius-medium)] shadow-2xl"
-                />
+                <div className="flex flex-col items-center gap-6">
+                  <img
+                    src={viewerAsset.uri}
+                    alt="Full view"
+                    className="max-w-full max-h-[80vh] object-contain rounded-[var(--border-radius-medium)] shadow-2xl"
+                  />
+                  {selectedRun?.input?.imageStyleInstruction && (
+                    <div className="w-full max-w-3xl bg-white/10 backdrop-blur-md rounded-[var(--border-radius-medium)] p-6 border border-white/20 shadow-xl">
+                      <div className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/50 mb-2">Style Instructions Used</div>
+                      <p className="text-white text-[15px] leading-relaxed font-medium">{selectedRun.input.imageStyleInstruction}</p>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <video
                   src={viewerAsset.uri}

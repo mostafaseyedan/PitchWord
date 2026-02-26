@@ -82,6 +82,7 @@ export class LibraryService {
     title: string;
     mimeTypeHint?: string;
     prompt?: string;
+    styleInstructions?: string;
   }): Promise<LibraryAsset> {
     const id = createId();
     const createdAt = nowIso();
@@ -105,7 +106,8 @@ export class LibraryService {
           title,
           source,
           createdAt,
-          prompt: params.prompt || ""
+          prompt: params.prompt || "",
+          styleInstructions: params.styleInstructions || ""
         }
       }
     });
@@ -119,7 +121,8 @@ export class LibraryService {
       sizeBytes: parsed.bytes.byteLength,
       source,
       createdAt,
-      prompt: params.prompt
+      prompt: params.prompt,
+      styleInstructions: params.styleInstructions
     };
   }
 
@@ -174,6 +177,7 @@ export class LibraryService {
     const source = meta.source === "graphic_generated" ? "graphic_generated" : "upload";
     const createdAt = String(meta.createdAt || metadata.timeCreated || nowIso());
     const prompt = meta.prompt ? String(meta.prompt) : undefined;
+    const styleInstructions = meta.styleInstructions ? String(meta.styleInstructions) : undefined;
     const uri = await this.getShareableUrl(file);
 
     return {
@@ -184,7 +188,8 @@ export class LibraryService {
       sizeBytes: Number(metadata.size || 0),
       source,
       createdAt,
-      prompt
+      prompt,
+      styleInstructions
     };
   }
 

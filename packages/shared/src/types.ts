@@ -115,6 +115,22 @@ export interface TeamsDelivery {
   status: "pending" | "posted" | "failed";
 }
 
+export interface VisualPresetOption {
+  id: string;
+  label: string;
+  promptHint?: string;
+}
+
+export interface FontPresetOption extends VisualPresetOption {
+  previewFontFamily: string;
+  roles?: any; // To hold font roles for resolution
+}
+
+export interface ColorSchemeOption extends VisualPresetOption {
+  swatches: [string, string, string];
+  roles?: any; // To hold color roles for resolution
+}
+
 export interface RunInput {
   manualIdeaText?: string;
   preselectedDraft?: ContentDraft;
@@ -191,6 +207,7 @@ export interface LibraryAsset {
   source: LibraryAssetSource;
   createdAt: string;
   prompt?: string;
+  styleInstructions?: string;
 }
 
 export interface GraphicGenerateRequest {
@@ -237,6 +254,6 @@ export interface AnalyticsSummary {
 }
 
 export interface EventMessage {
-  type: "run_updated" | "log_added";
-  payload: Run | AgentStepLog;
+  type: "run_updated" | "log_added" | "run_deleted";
+  payload: Run | AgentStepLog | { id: string };
 }

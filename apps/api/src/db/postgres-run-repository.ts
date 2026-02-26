@@ -286,6 +286,10 @@ export class PostgresRunRepository implements RunRepository {
     return result.length;
   }
 
+  async deleteRun(runId: string): Promise<void> {
+    await this.sql`DELETE FROM runs WHERE id = ${runId}`;
+  }
+
   private rowToRun(row: RunRow): Run {
     return {
       id: row.id,

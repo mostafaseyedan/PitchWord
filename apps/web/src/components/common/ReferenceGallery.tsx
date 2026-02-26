@@ -122,11 +122,10 @@ export const ReferenceGallery = ({
           return (
             <div
               key={asset.id}
-              className={`group relative mb-2 [break-inside:avoid] rounded-[var(--border-radius-small)] overflow-hidden border-2 shadow-[0_2px_8px_rgba(31,53,88,0.08)] transition-all ${
-                selected
+              className={`group relative mb-2 [break-inside:avoid] rounded-[var(--border-radius-small)] overflow-hidden border-2 shadow-[0_2px_8px_rgba(31,53,88,0.08)] transition-all ${selected
                   ? "border-primary ring-2 ring-primary/20"
                   : "border-border-warm/70 hover:border-primary/45"
-              } ${disabled ? "opacity-45 cursor-not-allowed" : "cursor-pointer"}`}
+                } ${disabled ? "opacity-45 cursor-not-allowed" : "cursor-pointer"}`}
               title={asset.title}
             >
               <button
@@ -239,11 +238,21 @@ export const ReferenceGallery = ({
                   alt={viewerAsset.title}
                   className="max-w-full max-h-[85vh] object-contain rounded-[var(--border-radius-medium)] shadow-2xl"
                 />
-                {mode === "view" && viewerAsset.prompt && (
+                {mode === "view" && (viewerAsset.prompt || viewerAsset.styleInstructions) && (
                   <div className="mt-4 w-full max-w-2xl bg-white/10 backdrop-blur-md rounded-[var(--border-radius-medium)] p-4 border border-white/20">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70 mb-1">Prompt Used</div>
-                    <p className="text-white text-[14px] leading-relaxed mb-3">{viewerAsset.prompt}</p>
-                    {onRegenerate && (
+                    {viewerAsset.prompt && (
+                      <div className="mb-4">
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70 mb-1">Prompt Used</div>
+                        <p className="text-white text-[14px] leading-relaxed">{viewerAsset.prompt}</p>
+                      </div>
+                    )}
+                    {viewerAsset.styleInstructions && (
+                      <div className="mb-4">
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/70 mb-1">Style Instructions</div>
+                        <p className="text-white text-[14px] leading-relaxed">{viewerAsset.styleInstructions}</p>
+                      </div>
+                    )}
+                    {onRegenerate && viewerAsset.prompt && (
                       <button
                         type="button"
                         onClick={() => {

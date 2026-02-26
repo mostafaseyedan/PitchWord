@@ -107,6 +107,10 @@ export const useDashboardData = () => {
       source = apiClient.createEventSource();
       source.addEventListener("run_updated", onRunUpdate as EventListener);
       source.addEventListener("log_added", onLogAdd as EventListener);
+      source.addEventListener("run_deleted", ((event: MessageEvent) => {
+        const { id } = JSON.parse(event.data) as { id: string };
+        setRuns((current) => current.filter((r) => r.id !== id));
+      }) as EventListener);
 
       source.onopen = () => {
         reconnectDelayMs = 1000;

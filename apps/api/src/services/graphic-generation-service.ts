@@ -21,20 +21,26 @@ export class GraphicGenerationService {
     const fontHint = getPresetHint(FONT_PRESETS, payload.fontPresetId);
     const colorHint = getPresetHint(COLOR_SCHEMES, payload.colorSchemeId);
 
-    const prompt = [
+    const promptParts = [
       "Create a professional graphic asset for Cendien.",
       payload.prompt,
-      styleHint ? `Style preset baseline: ${styleHint}` : "",
-      styleOverride ? `Style override (priority): ${styleOverride}` : "",
-      styleOverride ? "If style override conflicts with style preset baseline, prioritize the style override." : "",
-      fontHint ? `Font preset: ${fontHint}` : "",
-      colorHint ? `Color scheme preset: ${colorHint}` : "",
+    ];
+
+    if (styleOverride) {
+      promptParts.push(`Visual Design Instructions (CRITICAL OVERRIDE): ${styleOverride}`);
+    } else {
+      if (styleHint) promptParts.push(`Style preset: ${styleHint}`);
+      if (fontHint) promptParts.push(`Font preset: ${fontHint}`);
+      if (colorHint) promptParts.push(`Color scheme preset: ${colorHint}`);
+    }
+
+    promptParts.push(
       "No logos other than Cendien-compatible enterprise styling.",
       `Aspect ratio: ${payload.aspectRatio}`,
       `Resolution preference: ${payload.imageResolution}`
-    ]
-      .filter(Boolean)
-      .join("\n");
+    );
+
+    const prompt = promptParts.filter(Boolean).join("\n");
 
     const contents = referenceParts.length > 0
       ? [
@@ -78,7 +84,8 @@ export class GraphicGenerationService {
       uri,
       title: this.buildTitle(payload.prompt),
       mimeTypeHint,
-      prompt: payload.prompt
+      prompt: payload.prompt,
+      styleInstructions: styleOverride || styleHint
     });
   }
 

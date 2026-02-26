@@ -1250,8 +1250,18 @@ export function getResolvedStyleHint(
   colorId?: string
 ): string | undefined {
   if (!styleId) return undefined;
-  const style = stylePresets.find((p) => p.id === styleId);
+
+  // Search in the provided collection first
+  let style = stylePresets.find((p) => p.id === styleId);
+
+  // If not found, try the other collection (cross-pollination)
+  if (!style) {
+    const alternate = stylePresets === STYLE_PRESETS ? GRAPHIC_STYLE_PRESETS : STYLE_PRESETS;
+    style = alternate.find((p) => p.id === styleId);
+  }
+
   if (!style) return undefined;
+
   const font = fontId ? FONT_PRESETS.find((p) => p.id === fontId) : undefined;
   const color = colorId ? (COLOR_SCHEMES as ColorSchemePreset[]).find((p) => p.id === colorId) : undefined;
   return resolveStyleHint(style.promptHint, font, color);

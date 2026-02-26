@@ -154,4 +154,9 @@ export class InMemoryRunRepository implements RunRepository {
     }
     return count;
   }
+
+  async deleteRun(runId: string): Promise<void> {
+    this.runs.delete(runId);
+    this.logs = this.logs.filter((log) => log.runId !== runId);
+  }
 }
