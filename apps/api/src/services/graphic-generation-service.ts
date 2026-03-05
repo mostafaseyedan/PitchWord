@@ -2,7 +2,6 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import type { AspectRatio, GraphicGenerateRequest, ImageResolution, LibraryAsset } from "@marketing/shared";
 import { env } from "../config/env.js";
 import { LibraryService } from "./library-service.js";
-import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, getResolvedStyleHint, GRAPHIC_STYLE_PRESETS } from "./visual-presets.js";
 
 export class GraphicGenerationService {
   private ai = env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: env.GEMINI_API_KEY }) : undefined;
@@ -16,10 +15,7 @@ export class GraphicGenerationService {
 
     const maxReferences = 14;
     const referenceParts = await this.libraryService.getReferenceParts(payload.referenceAssetIds ?? [], maxReferences);
-    const styleHint = getResolvedStyleHint(GRAPHIC_STYLE_PRESETS, payload.stylePresetId, payload.fontPresetId, payload.colorSchemeId);
     const styleOverride = payload.styleOverride?.trim();
-    const fontHint = getPresetHint(FONT_PRESETS, payload.fontPresetId);
-    const colorHint = getPresetHint(COLOR_SCHEMES, payload.colorSchemeId);
 
     const promptParts = [
       "Create a professional graphic asset for Cendien.",
@@ -27,11 +23,7 @@ export class GraphicGenerationService {
     ];
 
     if (styleOverride) {
-      promptParts.push(`Visual Design Instructions (CRITICAL OVERRIDE): ${styleOverride}`);
-    } else {
-      if (styleHint) promptParts.push(`Style preset: ${styleHint}`);
-      if (fontHint) promptParts.push(`Font preset: ${fontHint}`);
-      if (colorHint) promptParts.push(`Color scheme preset: ${colorHint}`);
+      promptParts.push(`Visual Design Instructions:\n${styleOverride}`);
     }
 
     promptParts.push(
@@ -85,7 +77,7 @@ export class GraphicGenerationService {
       title: this.buildTitle(payload.prompt),
       mimeTypeHint,
       prompt: payload.prompt,
-      styleInstructions: styleOverride || styleHint
+      styleInstructions: styleOverride
     });
   }
 

@@ -79,6 +79,7 @@ export interface Asset {
   runId: string;
   type: AssetType;
   uri: string;
+  thumbnailUri?: string;
   modelId: string;
   generationMs: number;
   createdAt: string;
@@ -144,9 +145,8 @@ export interface RunInput {
   videoAspectRatio: VideoAspectRatio;
   videoResolution: VideoResolution;
   imageStyleInstruction?: string;
-  stylePresetId?: string;
-  fontPresetId?: string;
-  colorSchemeId?: string;
+  resolvedImagePrompt?: string;
+  resolvedStyleHint?: string;
 }
 
 export interface Run {
@@ -182,9 +182,7 @@ export interface DailyRunRequest {
   videoAspectRatio?: VideoAspectRatio;
   videoResolution?: VideoResolution;
   imageStyleInstruction?: string;
-  stylePresetId?: string;
-  fontPresetId?: string;
-  colorSchemeId?: string;
+  resolvedStyleHint?: string;
   referenceAssetIds?: string[];
 }
 
@@ -214,10 +212,7 @@ export interface GraphicGenerateRequest {
   prompt: string;
   aspectRatio: AspectRatio;
   imageResolution: ImageResolution;
-  stylePresetId?: string;
   styleOverride?: string;
-  fontPresetId?: string;
-  colorSchemeId?: string;
   referenceAssetIds?: string[];
 }
 
@@ -237,7 +232,6 @@ export interface RunPromptGenerateRequest {
   category: Category;
   tone: Tone;
   topicHint?: string;
-  stylePresetId?: string;
 }
 
 export interface RunPromptGenerateResponse {

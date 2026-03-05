@@ -48,9 +48,7 @@ export class RunService {
         videoAspectRatio: payload.videoAspectRatio ?? "16:9",
         videoResolution: payload.videoResolution ?? "720p",
         imageStyleInstruction: payload.imageStyleInstruction,
-        stylePresetId: payload.stylePresetId,
-        fontPresetId: payload.fontPresetId,
-        colorSchemeId: payload.colorSchemeId,
+        resolvedStyleHint: payload.resolvedStyleHint,
         referenceAssetIds: payload.referenceAssetIds
       }
     });

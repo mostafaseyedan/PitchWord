@@ -8,7 +8,6 @@ import { env } from "../config/env.js";
 import { createId } from "../utils/id.js";
 import { nowIso } from "../utils/time.js";
 import { LibraryService } from "./library-service.js";
-import { COLOR_SCHEMES, FONT_PRESETS, getPresetHint, getResolvedStyleHint, GRAPHIC_STYLE_PRESETS, STYLE_PRESETS } from "./visual-presets.js";
 
 const defaultLogoPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -54,54 +53,45 @@ export class ImageAgentService {
     }
 
     const startedAt = Date.now();
-    const brandedTitle = this.ensureCendienInTitle(draft.title);
-    const userStyleOverride = input.imageStyleInstruction?.trim();
-    const categoryContext =
-      category === "infor"
-        ? "Category context: Infor partnership. Use the provided Infor reference logo deliberately and professionally when composition allows."
-        : category === "team"
-          ? "Category context: Team spotlight. Use the provided team reference images to reflect authentic people-forward storytelling."
-          : "";
-    const brandGuard =
-      category === "infor"
-        ? "Infor branding is allowed in this category, but keep it secondary and tasteful beside Cendien branding."
-        : "Do not include Infor logo, Infor wordmark, or any third-party brand logos. Only Cendien branding is allowed.";
-    const stylePresetHint = getResolvedStyleHint(STYLE_PRESETS, input.stylePresetId, input.fontPresetId, input.colorSchemeId)
-      ?? getPresetHint(GRAPHIC_STYLE_PRESETS, input.stylePresetId);
-    const fontPresetHint = getPresetHint(FONT_PRESETS, input.fontPresetId);
-    const colorSchemeHint = getPresetHint(COLOR_SCHEMES, input.colorSchemeId);
-    const styleLine = userStyleOverride
-      ? `Additional style override from user: ${userStyleOverride}`
-      : "";
+    const userFinalPrompt = input.imageStyleInstruction?.trim();
 
-    const promptParts = [
-      "Create an enterprise marketing visual for Cendien.",
-      CENDIEN_CONTEXT,
-      `Title: ${brandedTitle}`,
-      `Body context: ${draft.body}`,
-      draft.painPoints.length > 0 ? `Target pain points: ${draft.painPoints.join(" | ")}` : "",
-    ];
+    let prompt: string;
 
-    if (userStyleOverride) {
-      promptParts.push(`Visual Design Instructions (CRITICAL OVERRIDE): ${userStyleOverride}`);
+    if (userFinalPrompt) {
+      // User has provided a Final Prompt — send it as-is, no additions.
+      prompt = userFinalPrompt;
     } else {
-      promptParts.push(stylePresetHint ? `Style preset: ${stylePresetHint}` : "Style preset: professional enterprise marketing visual.");
-      if (fontPresetHint) promptParts.push(`Font preset: ${fontPresetHint}`);
-      if (colorSchemeHint) promptParts.push(`Color scheme preset: ${colorSchemeHint}`);
+      // Build the default prompt from draft content + presets.
+      const brandedTitle = this.ensureCendienInTitle(draft.title);
+      const categoryContext =
+        category === "infor"
+          ? "Category context: Infor partnership. Use the provided Infor reference logo deliberately and professionally when composition allows."
+          : category === "team"
+            ? "Category context: Team spotlight. Use the provided team reference images to reflect authentic people-forward storytelling."
+            : "";
+      const brandGuard =
+        category === "infor"
+          ? "Infor branding is allowed in this category, but keep it secondary and tasteful beside Cendien branding."
+          : "Do not include Infor logo, Infor wordmark, or any third-party brand logos. Only Cendien branding is allowed.";
+      const promptParts = [
+        "Create an enterprise marketing visual for Cendien.",
+        CENDIEN_CONTEXT,
+        `Title: ${brandedTitle}`,
+        `Body context: ${draft.body}`,
+        draft.painPoints.length > 0 ? `Target pain points: ${draft.painPoints.join(" | ")}` : "",
+        input.resolvedStyleHint ?? "Style preset: professional enterprise marketing visual.",
+        categoryContext,
+        brandGuard,
+        "Use the provided Cendien logo as a visual reference and integrate it delicately.",
+        "Logo usage guidance: small-to-moderate size, clean placement, non-distracting, keep composition premium.",
+        "Preserve Cendien brand-safe and enterprise-appropriate quality.",
+        "If any headline/title text appears in the image, it must include the exact word 'Cendien'.",
+        `Aspect ratio: ${input.aspectRatio}`,
+        `Resolution preference: ${input.imageResolution}`,
+      ];
+
+      prompt = promptParts.filter(Boolean).join("\n\n");
     }
-
-    promptParts.push(
-      categoryContext,
-      brandGuard,
-      "Use the provided Cendien logo as a visual reference and integrate it delicately.",
-      "Logo usage guidance: small-to-moderate size, clean placement, non-distracting, keep composition premium.",
-      "Preserve Cendien brand-safe and enterprise-appropriate quality.",
-      "If any headline/title text appears in the image, it must include the exact word 'Cendien'.",
-      `Aspect ratio: ${input.aspectRatio}`,
-      `Resolution preference: ${input.imageResolution}`
-    );
-
-    const prompt = promptParts.filter(Boolean).join("\n");
 
     const model = env.GEMINI_IMAGE_MODEL;
     const modelClient = this.ai.models as any;
@@ -202,6 +192,36 @@ export class ImageAgentService {
       return normalized;
     }
     return `Cendien: ${normalized}`;
+  }
+
+  buildDefaultPrompt(draft: Pick<ContentDraft, "title" | "body" | "painPoints">, input: RunInput, category: Category): string {
+    const brandedTitle = this.ensureCendienInTitle(draft.title);
+    const categoryContext =
+      category === "infor"
+        ? "Category context: Infor partnership. Use the provided Infor reference logo deliberately and professionally when composition allows."
+        : category === "team"
+          ? "Category context: Team spotlight. Use the provided team reference images to reflect authentic people-forward storytelling."
+          : "";
+    const brandGuard =
+      category === "infor"
+        ? "Infor branding is allowed in this category, but keep it secondary and tasteful beside Cendien branding."
+        : "Do not include Infor logo, Infor wordmark, or any third-party brand logos. Only Cendien branding is allowed.";
+    return [
+      "Create an enterprise marketing visual for Cendien.",
+      CENDIEN_CONTEXT,
+      `Title: ${brandedTitle}`,
+      `Body context: ${draft.body}`,
+      draft.painPoints.length > 0 ? `Target pain points: ${draft.painPoints.join(" | ")}` : "",
+      input.resolvedStyleHint ?? "Style preset: professional enterprise marketing visual.",
+      categoryContext,
+      brandGuard,
+      "Use the provided Cendien logo as a visual reference and integrate it delicately.",
+      "Logo usage guidance: small-to-moderate size, clean placement, non-distracting, keep composition premium.",
+      "Preserve Cendien brand-safe and enterprise-appropriate quality.",
+      "If any headline/title text appears in the image, it must include the exact word 'Cendien'.",
+      `Aspect ratio: ${input.aspectRatio}`,
+      `Resolution preference: ${input.imageResolution}`,
+    ].filter(Boolean).join("\n\n");
   }
 
   private toImagenAspectRatio(aspectRatio: RunInput["aspectRatio"]): string {

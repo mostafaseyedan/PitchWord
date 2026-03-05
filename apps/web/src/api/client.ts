@@ -176,6 +176,19 @@ export const apiClient = {
     return parseJson<GraphicTopicGenerateResponse>(response);
   },
 
+  async previewImagePrompt(payload: {
+    title: string; body: string; painPoints: string[];
+    category: string; aspectRatio: string; imageResolution: string;
+    resolvedStyleHint?: string;
+  }): Promise<{ prompt: string }> {
+    const response = await fetch(`${API_BASE}/api/runs/preview-prompt`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    return parseJson<{ prompt: string }>(response);
+  },
+
   async generateRunPrompts(payload: RunPromptGenerateRequest): Promise<RunPromptGenerateResponse> {
     const response = await fetch(`${API_BASE}/api/runs/generate-prompts`, {
       method: "POST",

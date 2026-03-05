@@ -6,7 +6,6 @@ export interface RunPromptGeneratePayload {
   category: Category;
   tone: Tone;
   topicHint?: string;
-  stylePresetId?: string;
 }
 
 export class RunPromptService {

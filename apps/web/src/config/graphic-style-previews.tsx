@@ -29,7 +29,7 @@ export const graphicStylePreviewById: Record<string, GraphicStylePreview> = {
         kind: "vector_icon_system",
     },
     flat_infographic: {
-        title: "Flat Infographic",
+        title: "Infoghraphic",
         description: "Bold flat blocks, clear hierarchy, data-friendly composition.",
         background: "linear-gradient(135deg, #EAF8F7 0%, #D6EEEB 100%)",
         accent: "#1A7A73",

@@ -17,7 +17,8 @@ export const HistoryList = ({ runs, selectedRunId, onSelectRun, onDeleteRun }: H
   const hiddenStatuses = new Set(["posted", "review_ready", "failed"]);
 
   const getRunThumbnail = (run: Run) => {
-    return run.assets.find(a => a.type === "image")?.uri;
+    const asset = run.assets.find(a => a.type === "image");
+    return asset?.thumbnailUri ?? asset?.uri;
   };
 
   return (
@@ -95,25 +96,24 @@ export const HistoryList = ({ runs, selectedRunId, onSelectRun, onDeleteRun }: H
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="grid grid-cols-2 gap-2 p-3"
+              className="grid grid-cols-3 gap-2 p-3"
             >
-              {runs.map((run, i) => {
+              {runs.map((run) => {
                 const thumbnail = getRunThumbnail(run);
                 const isSelected = run.id === selectedRunId;
                 return (
-                  <motion.div
+                  <div
                     key={run.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.02 }}
-                    className={`relative aspect-[4/5] rounded-xl overflow-hidden cursor-pointer border-2 transition-all group ${isSelected ? "border-primary shadow-lg ring-2 ring-primary/10" : "border-black/10 hover:border-black/20"}`}
+                    className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-colors group ${isSelected ? "border-primary shadow-lg ring-2 ring-primary/10" : "border-black/10 hover:border-black/20"}`}
                     onClick={() => onSelectRun(run.id)}
                   >
                     {thumbnail ? (
                       <img
                         src={thumbnail}
                         alt={run.draft?.title || "Run thumbnail"}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                        decoding="async"
+                        className="absolute inset-0 w-full h-full object-contain bg-secondary/5"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-secondary/5 flex items-center justify-center p-4">
@@ -149,7 +149,7 @@ export const HistoryList = ({ runs, selectedRunId, onSelectRun, onDeleteRun }: H
                         <StatusPill status={run.status} />
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                 );
               })}
             </motion.div>

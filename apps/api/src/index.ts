@@ -32,6 +32,7 @@ import { VertexContextService } from "./services/vertex-context-service.js";
 import { VideoAgentService } from "./services/video-agent-service.js";
 import { MediaStorageService } from "./services/media-storage-service.js";
 import { LibraryService } from "./services/library-service.js";
+import { LocalAssetStorageService } from "./services/local-asset-storage-service.js";
 
 const createRepository = async (): Promise<RunRepository> => {
   if (!env.DATABASE_URL) {
@@ -53,10 +54,23 @@ const start = async (): Promise<void> => {
 
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const publicPath = path.join(__dirname, "../../web/dist");
+  const uploadsPath = path.join(__dirname, "../uploads/assets");
 
   await app.register(fastifyStatic, {
     root: publicPath,
     wildcard: false
+  });
+
+  // Serve generated images and thumbnails from the uploads/assets directory
+  await app.register(fastifyStatic, {
+    root: uploadsPath,
+    prefix: "/assets",
+    decorateReply: false,
+    wildcard: true,
+    serve: true,
+    setHeaders: (res) => {
+      res.setHeader("cache-control", "public, max-age=31536000, immutable");
+    }
   });
 
   await app.register(multipart, {
@@ -81,6 +95,7 @@ const start = async (): Promise<void> => {
   const imageAgentService = new ImageAgentService(libraryService);
   const videoAgentService = new VideoAgentService();
   const mediaStorageService = new MediaStorageService();
+  const localAssetStorageService = new LocalAssetStorageService();
   const graphicGenerationService = new GraphicGenerationService(libraryService);
   const graphicTopicService = new GraphicTopicService();
   const runPromptService = new RunPromptService(newsHunterService, contentCreatorService);
@@ -97,7 +112,9 @@ const start = async (): Promise<void> => {
     imageAgentService,
     videoAgentService,
     mediaStorageService,
-    teamsDeliveryService
+    localAssetStorageService,
+    teamsDeliveryService,
+    env.APP_BASE_URL
   );
 
   const queue = new InMemoryJobQueue(async ({ runId }) => {
@@ -122,6 +139,7 @@ const start = async (): Promise<void> => {
   const routeDeps = {
     runService,
     runRepository,
+    imageAgentService,
     settingsService,
     uploadService,
     libraryService,

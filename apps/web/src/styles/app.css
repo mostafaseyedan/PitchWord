@@ -249,8 +249,8 @@ h3 {
 }
 
 .workspace-side-rail {
-  flex: 0 0 clamp(23rem, 34vw, 29rem);
-  min-width: 23rem;
+  flex: 0 0 clamp(26rem, 38vw, 34rem);
+  min-width: 26rem;
   background-color: #ffffff !important;
   border-right: 1px solid oklch(0.9 0.015 245 / 0.8);
   display: flex;

@@ -1,10 +1,10 @@
 import type { Run } from "@marketing/shared";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../common/Button";
-import { X, Mail } from "lucide-react";
+import { TextAreaField } from "../common/TextAreaField";
+import { X, Mail, ChevronDown } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { colorSchemeOptions, fontPresetOptions, stylePresetOptions, graphicStylePresetOptions } from "../../config/visual-presets";
 
 const EMAIL_DOMAIN = "@cendien.com";
 
@@ -21,7 +21,7 @@ function RecipientTagInput({
   const addRecipient = (raw: string) => {
     const username = raw.trim().replace(/@cendien\.com$/i, "");
     if (!username) return;
-    const email = `${username}${EMAIL_DOMAIN}`;
+    const email = `${username}${EMAIL_DOMAIN} `;
     if (emails.includes(email)) return;
     onChange([...emails, email]);
     setInputValue("");
@@ -94,6 +94,7 @@ interface PreviewDeliveryPanelProps {
   onRecipientEmailsChange: (value: string[]) => void;
   onPostToTeams: () => void;
   onRetryTeams: () => void;
+  onRegenerateImage: (prompt: string) => void;
   busy: boolean;
 }
 
@@ -103,9 +104,18 @@ export const PreviewDeliveryPanel = ({
   onRecipientEmailsChange,
   onPostToTeams,
   onRetryTeams,
+  onRegenerateImage,
   busy,
 }: PreviewDeliveryPanelProps) => {
+  const storedPrompt = selectedRun?.input?.resolvedImagePrompt ?? selectedRun?.input?.imageStyleInstruction ?? "";
+  const [editablePrompt, setEditablePrompt] = useState(storedPrompt);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isPromptExpanded, setIsPromptExpanded] = useState(false);
+
+  // Reset editable prompt whenever the selected run changes
+  useEffect(() => {
+    setEditablePrompt(selectedRun?.input?.resolvedImagePrompt ?? selectedRun?.input?.imageStyleInstruction ?? "");
+  }, [selectedRun?.id]);
   const [viewerAsset, setViewerAsset] = useState<Run["assets"][0] | null>(null);
 
   // Close modal on ESC
@@ -120,6 +130,7 @@ export const PreviewDeliveryPanel = ({
   const handleDownload = async (uri: string, filename: string) => {
     try {
       const response = await fetch(uri);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -128,9 +139,10 @@ export const PreviewDeliveryPanel = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
     } catch (error) {
-      console.error("Download failed:", error);
+      console.warn("Blob download failed, opening in new tab:", error);
+      window.open(uri, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -206,7 +218,10 @@ export const PreviewDeliveryPanel = ({
 
                       <Tooltip.Root>
                         <Tooltip.Trigger
-                          onClick={() => handleDownload(asset.uri, `${asset.type}-${asset.id}`)}
+                          onClick={() => {
+                            const ext = asset.uri.split("?")[0]?.split(".").pop() ?? (asset.type === "video" ? "mp4" : "jpg");
+                            handleDownload(asset.uri, `${asset.type}-${asset.id}.${ext}`);
+                          }}
                           className="relative px-5 py-2 text-[12px] font-semibold tracking-[0.005em] rounded-[var(--border-radius-small)] text-secondary hover:bg-primary hover:text-white transition-all duration-200 outline-none"
                         >
                           <span>Download</span>
@@ -243,30 +258,23 @@ export const PreviewDeliveryPanel = ({
                       </div>
 
                       <div className="space-y-1">
-                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Format</div>
+                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Aspect Ratio</div>
                         <p className="text-[14px] font-semibold text-primary">
-                          {selectedRun.input.aspectRatio} ({selectedRun.input.requestedMedia === "image_only" ? "Image" : "Image + Video"})
+                          {selectedRun.input.aspectRatio}
                         </p>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Style Preset</div>
-                        <p className="text-[13px] font-medium text-secondary">
-                          {[...stylePresetOptions, ...graphicStylePresetOptions].find(p => p.id === selectedRun.input.stylePresetId)?.label || "None"}
+                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Size</div>
+                        <p className="text-[14px] font-semibold text-primary">
+                          {selectedRun.input.imageResolution} ({selectedRun.input.requestedMedia === "image_only" ? "Image" : "Image + Video"})
                         </p>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Typography</div>
+                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Style</div>
                         <p className="text-[13px] font-medium text-secondary">
-                          {fontPresetOptions.find(p => p.id === selectedRun.input.fontPresetId)?.label || "Default"}
-                        </p>
-                      </div>
-
-                      <div className="space-y-1 col-span-2">
-                        <div className="text-[10px] font-bold text-sage/60 uppercase tracking-wider">Color Scheme</div>
-                        <p className="text-[13px] font-medium text-secondary">
-                          {colorSchemeOptions.find(p => p.id === selectedRun.input.colorSchemeId)?.label || "Standard"}
+                          {selectedRun.input.imageStyleInstruction ? "Custom prompt" : selectedRun.input.resolvedStyleHint ? "Preset applied" : "Default"}
                         </p>
                       </div>
                     </div>
@@ -300,14 +308,46 @@ export const PreviewDeliveryPanel = ({
                     <p className="body-md whitespace-pre-wrap">{selectedRun.draft.body}</p>
                   </div>
 
-                  {selectedRun?.input?.imageStyleInstruction && (
-                    <div className="p-6 rounded-[var(--border-radius-medium)] bg-primary/5 border border-primary/10 shadow-sm transition-all hover:bg-primary/[0.07]">
-                      <div className="text-label-small mb-3 opacity-50 tracking-[0.1em]">Visual instruction used</div>
-                      <p className="text-[14px] text-primary/80 leading-relaxed font-semibold italic">
-                        "{selectedRun.input.imageStyleInstruction}"
-                      </p>
-                    </div>
-                  )}
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setIsPromptExpanded((v) => !v)}
+                      className="flex w-full items-center justify-between px-3 py-2 rounded-[var(--border-radius-small)] border border-[color:var(--ui-border-color)] bg-[color:var(--secondary-background-color)] text-label-small tracking-[0.1em] text-secondary hover:border-[color:var(--primary-color)] hover:text-primary transition-colors cursor-pointer select-none"
+                    >
+                      <span>Prompt used</span>
+                      <ChevronDown size={14} className={`shrink-0 transition-transform duration-200 ${isPromptExpanded ? "rotate-180" : ""}`} />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isPromptExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2, ease: "easeInOut" }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-3">
+                            <TextAreaField
+                              id="prompt-used"
+                              value={editablePrompt}
+                              onChange={setEditablePrompt}
+                              className="!font-mono !text-[13px] !bg-[color:var(--allgrey-background-color)]"
+                            />
+                            <div className="mt-3 flex justify-end">
+                              <button
+                                type="button"
+                                disabled={busy}
+                                onClick={() => onRegenerateImage(editablePrompt)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--border-radius-small)] border border-transparent bg-primary text-white text-[11px] font-semibold shadow-[0_4px_12px_rgba(27,54,93,0.22)] hover:bg-[#162f4f] transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {busy ? "Regenerating..." : "Regenerate"}
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
                   {selectedRun.draft.painPoints.length > 0 && (
                     <div className="p-6 rounded-[var(--border-radius-medium)] bg-white/40">
@@ -403,19 +443,11 @@ export const PreviewDeliveryPanel = ({
                 Close (ESC)
               </button>
               {viewerAsset.type === "image" ? (
-                <div className="flex flex-col items-center gap-6">
-                  <img
-                    src={viewerAsset.uri}
-                    alt="Full view"
-                    className="max-w-full max-h-[80vh] object-contain rounded-[var(--border-radius-medium)] shadow-2xl"
-                  />
-                  {selectedRun?.input?.imageStyleInstruction && (
-                    <div className="w-full max-w-3xl bg-white/10 backdrop-blur-md rounded-[var(--border-radius-medium)] p-6 border border-white/20 shadow-xl">
-                      <div className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/50 mb-2">Style Instructions Used</div>
-                      <p className="text-white text-[15px] leading-relaxed font-medium">{selectedRun.input.imageStyleInstruction}</p>
-                    </div>
-                  )}
-                </div>
+                <img
+                  src={viewerAsset.uri}
+                  alt="Full view"
+                  className="max-w-full max-h-[85vh] object-contain rounded-[var(--border-radius-medium)] shadow-2xl"
+                />
               ) : (
                 <video
                   src={viewerAsset.uri}

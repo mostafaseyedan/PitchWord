@@ -16,7 +16,7 @@ import { apiClient } from "./api/client";
 import { useDashboardData } from "./hooks/use-dashboard-data";
 import { TopBar } from "./components/layout/TopNav";
 import { RunSetupPanel } from "./components/dashboard/RunSetupPanel";
-import { LiveWorkspacePanel } from "./components/dashboard/LiveWorkspacePanel";
+
 import { PreviewDeliveryPanel } from "./components/dashboard/PreviewDeliveryPanel";
 import { HistoryList } from "./components/history/HistoryList";
 import { LogsView } from "./components/logs/LogsView";
@@ -33,7 +33,7 @@ import {
 } from "./config/visual-presets";
 import "./styles/app.css";
 
-type PaneView = "run_setup" | "graphics" | "analytics" | "publishing" | "active_stream";
+type PaneView = "run_setup" | "graphics" | "analytics" | "publishing";
 
 function App() {
   const { runs, logs, analytics, loading, error, setError } = useDashboardData();
@@ -84,15 +84,37 @@ function App() {
   const [busy, setBusy] = useState(false);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const buildResolvedStyleHint = (sPresetId: string, fPresetId: string, cSchemeId: string): string => {
     const allPresets = [...stylePresetOptions, ...graphicStylePresetOptions];
-    const style = allPresets.find((p) => p.id === stylePresetId);
-    const font = fontPresetOptions.find((p) => p.id === fontPresetId);
-    const color = colorSchemeOptions.find((p) => p.id === colorSchemeId);
+    const style = allPresets.find((p) => p.id === sPresetId);
+    const font = fontPresetOptions.find((p) => p.id === fPresetId);
+    const color = colorSchemeOptions.find((p) => p.id === cSchemeId);
+    return [
+      style?.promptHint ? `Style preset: ${resolveStyleHint(style.promptHint, font, color)}` : "",
+      font?.promptHint ? `Font preset: ${font.promptHint}` : "",
+      color?.promptHint ? `Color scheme preset: ${color.promptHint}` : "",
+    ].filter(Boolean).join("\n");
+  };
 
-    if (style && style.promptHint) {
-      const resolved = resolveStyleHint(style.promptHint, font, color);
-      setImageStyleInstruction(resolved);
+  useEffect(() => {
+    if (selectedRunPromptOptionIndex !== null && manualIdeaText) {
+      // A topic is already selected — rebuild the full prompt with the new preset.
+      const sepIndex = manualIdeaText.indexOf("\n\n");
+      const title = sepIndex >= 0 ? manualIdeaText.slice(0, sepIndex) : manualIdeaText;
+      const body = sepIndex >= 0 ? manualIdeaText.slice(sepIndex + 2) : "";
+      apiClient.previewImagePrompt({
+        title, body, painPoints: [], category, aspectRatio, imageResolution,
+        resolvedStyleHint: buildResolvedStyleHint(stylePresetId, fontPresetId, colorSchemeId) || undefined,
+      }).then(({ prompt }) => setImageStyleInstruction(prompt)).catch(() => {});
+    } else {
+      // No topic selected — just reflect the style preset hint.
+      const allPresets = [...stylePresetOptions, ...graphicStylePresetOptions];
+      const style = allPresets.find((p) => p.id === stylePresetId);
+      const font = fontPresetOptions.find((p) => p.id === fontPresetId);
+      const color = colorSchemeOptions.find((p) => p.id === colorSchemeId);
+      if (style && style.promptHint) {
+        setImageStyleInstruction(resolveStyleHint(style.promptHint, font, color));
+      }
     }
   }, [stylePresetId, fontPresetId, colorSchemeId]);
 
@@ -188,14 +210,12 @@ function App() {
         videoAspectRatio,
         videoResolution,
         imageStyleInstruction: imageStyleInstruction || undefined,
-        stylePresetId,
-        fontPresetId,
-        colorSchemeId,
+        resolvedStyleHint: buildResolvedStyleHint(stylePresetId, fontPresetId, colorSchemeId) || undefined,
         referenceAssetIds: selectedReferenceAssetIds
       });
       setActiveRunId(run.id);
       setSelectedRunId(run.id);
-      setPaneView("active_stream");
+      setPaneView("publishing");
     } catch (runError) {
       setError(runError instanceof Error ? runError.message : String(runError));
       setBusy(false);
@@ -231,9 +251,7 @@ function App() {
         videoAspectRatio,
         videoResolution,
         imageStyleInstruction: imageStyleInstruction || undefined,
-        stylePresetId,
-        fontPresetId,
-        colorSchemeId
+        resolvedStyleHint: buildResolvedStyleHint(stylePresetId, fontPresetId, colorSchemeId) || undefined
       }
     };
     try {
@@ -241,7 +259,7 @@ function App() {
       const run = await apiClient.createManualRun(payload);
       setActiveRunId(run.id);
       setSelectedRunId(run.id);
-      setPaneView("active_stream");
+      setPaneView("publishing");
     } catch (runError) {
       setError(runError instanceof Error ? runError.message : String(runError));
       setBusy(false);
@@ -256,7 +274,6 @@ function App() {
         category,
         tone,
         topicHint: (manualIdeaText || selectedNewsTopic).trim() || undefined,
-        stylePresetId
       });
       setRunPromptOptions(result.prompts);
       if (result.prompts[0]) {
@@ -275,6 +292,25 @@ function App() {
   const handleSelectRunPromptOption = (value: string, index: number): void => {
     setManualIdeaText(value);
     setSelectedRunPromptOptionIndex(index);
+
+    // Parse the topic option (format: "title\n\nbody")
+    const sepIndex = value.indexOf("\n\n");
+    const title = sepIndex >= 0 ? value.slice(0, sepIndex) : value;
+    const body = sepIndex >= 0 ? value.slice(sepIndex + 2) : "";
+
+    // Fetch the full prompt from the server so the user sees exactly what
+    // will be sent to the image model (including brand context, guard rules, etc.)
+    apiClient.previewImagePrompt({
+      title,
+      body,
+      painPoints: [],
+      category,
+      aspectRatio,
+      imageResolution,
+      resolvedStyleHint: buildResolvedStyleHint(stylePresetId, fontPresetId, colorSchemeId) || undefined,
+    }).then(({ prompt }) => setImageStyleInstruction(prompt)).catch(() => {
+      setImageStyleInstruction([value, buildResolvedStyleHint(stylePresetId, fontPresetId, colorSchemeId)].filter(Boolean).join("\n\n"));
+    });
   };
 
   const refreshLibraryAssets = async (): Promise<void> => {
@@ -332,10 +368,7 @@ function App() {
         prompt: graphicPrompt,
         aspectRatio,
         imageResolution,
-        stylePresetId: graphicStylePresetId,
         styleOverride: graphicStyleOverride.trim() || undefined,
-        fontPresetId,
-        colorSchemeId,
         referenceAssetIds: selectedReferenceAssetIds
       });
       await refreshLibraryAssets();
@@ -397,6 +430,22 @@ function App() {
     try {
       setBusy(true);
       await apiClient.retryStep(selectedRun.id, { stepName: "teams_delivery" });
+    } catch (retryError) {
+      setError(retryError instanceof Error ? retryError.message : String(retryError));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleRegenerateImage = async (prompt: string): Promise<void> => {
+    if (!selectedRun) return;
+    try {
+      setBusy(true);
+      if (prompt) {
+        setImageStyleInstruction(prompt);
+      }
+      await apiClient.retryStep(selectedRun.id, { stepName: "image_agent" });
+      setPaneView("publishing");
     } catch (retryError) {
       setError(retryError instanceof Error ? retryError.message : String(retryError));
     } finally {
@@ -563,12 +612,6 @@ function App() {
 
               {paneView === "analytics" ? <LogsView analytics={analytics} logs={logs} /> : null}
 
-              {paneView === "active_stream" ? (
-                <LiveWorkspacePanel
-                  selectedRun={selectedRun}
-                  onShowResult={() => setPaneView("publishing")}
-                />
-              ) : null}
 
               {paneView === "publishing" ? (
                 <PreviewDeliveryPanel
@@ -577,6 +620,7 @@ function App() {
                   onRecipientEmailsChange={setRecipientEmails}
                   onPostToTeams={handlePostToTeams}
                   onRetryTeams={handleRetryTeams}
+                  onRegenerateImage={handleRegenerateImage}
                   busy={busy}
                 />
               ) : null}

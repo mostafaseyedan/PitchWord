@@ -19,9 +19,7 @@ const dailySchema = z.object({
   videoAspectRatio: z.enum(VIDEO_ASPECT_RATIOS).optional(),
   videoResolution: z.enum(VIDEO_RESOLUTIONS).optional(),
   imageStyleInstruction: z.string().max(8000).optional(),
-  stylePresetId: z.string().optional(),
-  fontPresetId: z.string().optional(),
-  colorSchemeId: z.string().optional(),
+  resolvedStyleHint: z.string().max(16000).optional(),
   referenceAssetIds: z.array(z.string()).max(14).optional()
 });
 
@@ -54,9 +52,7 @@ const manualSchema = z.object({
     videoAspectRatio: z.enum(VIDEO_ASPECT_RATIOS).default("16:9"),
     videoResolution: z.enum(VIDEO_RESOLUTIONS).default("720p"),
     imageStyleInstruction: z.string().max(8000).optional(),
-    stylePresetId: z.string().optional(),
-    fontPresetId: z.string().optional(),
-    colorSchemeId: z.string().optional(),
+    resolvedStyleHint: z.string().max(16000).optional(),
     referenceAssetIds: z.array(z.string()).max(14).optional()
   })
 });
@@ -72,8 +68,7 @@ const postToTeamsSchema = z.object({
 const runPromptSchema = z.object({
   category: z.enum(CATEGORIES),
   tone: z.enum(TONES),
-  topicHint: z.string().max(8000).optional(),
-  stylePresetId: z.string().optional()
+  topicHint: z.string().max(8000).optional()
 });
 
 export const registerRunRoutes: RouteRegistrar = (app, deps) => {
@@ -95,6 +90,27 @@ export const registerRunRoutes: RouteRegistrar = (app, deps) => {
 
     const run = await deps.runService.createManualRun(parsed.data);
     return reply.status(202).send(run);
+  });
+
+  app.post("/api/runs/preview-prompt", async (request, reply) => {
+    const schema = z.object({
+      title: z.string(),
+      body: z.string(),
+      painPoints: z.array(z.string()).default([]),
+      category: z.enum(CATEGORIES),
+      aspectRatio: z.enum(ASPECT_RATIOS),
+      imageResolution: z.enum(IMAGE_RESOLUTIONS),
+      resolvedStyleHint: z.string().max(16000).optional(),
+    });
+    const parsed = schema.safeParse(request.body ?? {});
+    if (!parsed.success) return reply.status(400).send({ error: parsed.error.flatten() });
+    const { title, body, painPoints, category, aspectRatio, imageResolution, resolvedStyleHint } = parsed.data;
+    const prompt = deps.imageAgentService.buildDefaultPrompt(
+      { title, body, painPoints },
+      { aspectRatio, imageResolution, resolvedStyleHint, requestedMedia: "image_only", uploadedFileRefs: [], videoDurationSeconds: 8, videoAspectRatio: "16:9", videoResolution: "1080p" },
+      category
+    );
+    return reply.status(200).send({ prompt });
   });
 
   app.post("/api/runs/generate-prompts", async (request, reply) => {

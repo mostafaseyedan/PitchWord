@@ -18,6 +18,7 @@ import { TeamsDeliveryService } from "./teams-delivery-service.js";
 import { VertexContextService } from "./vertex-context-service.js";
 import { VideoAgentService } from "./video-agent-service.js";
 import { MediaStorageService } from "./media-storage-service.js";
+import { LocalAssetStorageService } from "./local-asset-storage-service.js";
 import { defaultGroundedQueryByCategory } from "../agents/prompts/category-queries.js";
 import { createId } from "../utils/id.js";
 import { nowIso } from "../utils/time.js";
@@ -32,8 +33,10 @@ export class RunOrchestrator {
     private readonly imageAgentService: ImageAgentService,
     private readonly videoAgentService: VideoAgentService,
     private readonly mediaStorageService: MediaStorageService,
-    private readonly teamsDeliveryService: TeamsDeliveryService
-  ) {}
+    private readonly localAssetStorageService: LocalAssetStorageService,
+    private readonly teamsDeliveryService: TeamsDeliveryService,
+    private readonly appBaseUrl: string
+  ) { }
 
   async executeRun(runId: string): Promise<void> {
     const run = await this.requireRun(runId);
@@ -149,7 +152,15 @@ export class RunOrchestrator {
         "image_agent",
         async () => {
           const generated = await this.imageAgentService.generate(run.id, draft, run.input, run.category);
-          const persisted = await this.mediaStorageService.persistAsset(generated.result);
+
+          // 1. Try to save to local disk (full + thumbnail)
+          const localSaved = await this.localAssetStorageService.saveImage(generated.result, this.appBaseUrl);
+          const assetWithLocalUrls = localSaved
+            ? { ...generated.result, uri: localSaved.uri, thumbnailUri: localSaved.thumbnailUri }
+            : generated.result;
+
+          // 2. Then optionally push to GCS (replaces uri with GCS URL if configured)
+          const persisted = await this.mediaStorageService.persistAsset(assetWithLocalUrls);
           return {
             ...generated,
             result: persisted.result,
@@ -164,6 +175,10 @@ export class RunOrchestrator {
       );
       const imageAsset = imageOutput.result;
 
+      await this.repository.updateRun(run.id, (r) => ({
+        ...r,
+        input: { ...r.input, resolvedImagePrompt: imageOutput.meta.prompt }
+      }));
       await this.repository.addAsset(run.id, imageAsset);
       await this.publishRun(run.id);
 
@@ -378,7 +393,7 @@ export class RunOrchestrator {
       status: "started",
       message: "video_agent started (background)",
       startedAt
-    }).catch(() => {});
+    }).catch(() => { });
 
     this.videoAgentService
       .start(runId, draft, input, category, imageUri)
@@ -397,7 +412,7 @@ export class RunOrchestrator {
           endedAt: nowIso(),
           errorCode: "VIDEO_START_FAILED",
           errorMessage: message
-        }).catch(() => {});
+        }).catch(() => { });
         console.log(JSON.stringify({
           level: "error",
           time: Date.now(),
@@ -487,7 +502,7 @@ export class RunOrchestrator {
 
         // Backoff: 5s → 7.5s → 11s → ... capped at 30s
         const waitMs = Math.min(5000 * Math.pow(1.5, Math.min(attempt - 1, 8)), 30_000);
-        setTimeout(() => { tick().catch(() => {}); }, waitMs);
+        setTimeout(() => { tick().catch(() => { }); }, waitMs);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         await this.appendLog({
@@ -500,7 +515,7 @@ export class RunOrchestrator {
           endedAt: nowIso(),
           errorCode: "VIDEO_POLL_ERROR",
           errorMessage: message
-        }).catch(() => {});
+        }).catch(() => { });
         console.log(JSON.stringify({
           level: "error",
           time: Date.now(),
@@ -514,7 +529,7 @@ export class RunOrchestrator {
     };
 
     // First poll after 5 seconds
-    setTimeout(() => { tick().catch(() => {}); }, 5000);
+    setTimeout(() => { tick().catch(() => { }); }, 5000);
   }
 
   private sleep(ms: number): Promise<void> {

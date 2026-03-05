@@ -123,8 +123,8 @@ export const ReferenceGallery = ({
             <div
               key={asset.id}
               className={`group relative mb-2 [break-inside:avoid] rounded-[var(--border-radius-small)] overflow-hidden border-2 shadow-[0_2px_8px_rgba(31,53,88,0.08)] transition-all ${selected
-                  ? "border-primary ring-2 ring-primary/20"
-                  : "border-border-warm/70 hover:border-primary/45"
+                ? "border-primary ring-2 ring-primary/20"
+                : "border-border-warm/70 hover:border-primary/45"
                 } ${disabled ? "opacity-45 cursor-not-allowed" : "cursor-pointer"}`}
               title={asset.title}
             >

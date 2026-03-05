@@ -6,7 +6,7 @@ interface TextAreaFieldProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaEle
   onChange: (value: string) => void;
 }
 
-export const TextAreaField = ({ label, helpText, onChange, id, ...rest }: TextAreaFieldProps) => {
+export const TextAreaField = ({ label, helpText, onChange, id, className, ...rest }: TextAreaFieldProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export const TextAreaField = ({ label, helpText, onChange, id, ...rest }: TextAr
       ) : null}
       <textarea
         ref={textareaRef}
-        className="w-full min-h-[96px] overflow-hidden px-4 py-2 text-[14px] font-normal leading-5 text-[color:var(--primary-text-color)] bg-[color:var(--secondary-background-color)] border border-[color:var(--ui-border-color)] rounded-[var(--border-radius-small)] outline-none resize-none transition-colors duration-150 hover:border-[color:var(--primary-text-color)] focus:border-[color:var(--primary-color)] placeholder:text-[color:var(--secondary-text-color)] placeholder:opacity-55 disabled:bg-[color:var(--disabled-background-color)] disabled:text-[color:var(--disabled-text-color)] disabled:border-transparent disabled:resize-none disabled:cursor-not-allowed read-only:bg-[color:var(--allgrey-background-color)] read-only:border-transparent read-only:resize-none read-only:cursor-default"
+        className={`w-full min-h-[96px] overflow-hidden px-4 py-2 text-[14px] font-normal leading-5 text-[color:var(--primary-text-color)] bg-[color:var(--secondary-background-color)] border border-[color:var(--ui-border-color)] rounded-[var(--border-radius-small)] outline-none resize-none transition-colors duration-150 hover:border-[color:var(--primary-text-color)] focus:border-[color:var(--primary-color)] placeholder:text-[color:var(--secondary-text-color)] placeholder:opacity-55 disabled:bg-[color:var(--disabled-background-color)] disabled:text-[color:var(--disabled-text-color)] disabled:border-transparent disabled:resize-none disabled:cursor-not-allowed read-only:bg-[color:var(--allgrey-background-color)] read-only:border-transparent read-only:resize-none read-only:cursor-default ${className || ""}`}
         id={id}
         onChange={(e) => {
           e.currentTarget.style.height = "auto";
