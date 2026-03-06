@@ -188,6 +188,7 @@ export interface DailyRunRequest {
 
 export interface RetryStepRequest {
   stepName: AgentStepName;
+  imageStyleInstruction?: string;
 }
 
 export interface PostToTeamsRequest {

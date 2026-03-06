@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Run } from "@marketing/shared";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutList, LayoutGrid, Trash2 } from "lucide-react";
@@ -16,9 +16,8 @@ export const HistoryList = ({ runs, selectedRunId, onSelectRun, onDeleteRun }: H
   const [viewMode, setViewMode] = useState<"list" | "gallery">("gallery");
   const hiddenStatuses = new Set(["posted", "review_ready", "failed"]);
 
-  const getRunThumbnail = (run: Run) => {
-    const asset = run.assets.find(a => a.type === "image");
-    return asset?.thumbnailUri ?? asset?.uri;
+  const getRunThumbnailAsset = (run: Run) => {
+    return [...run.assets].reverse().find((asset) => asset.type === "image");
   };
 
   return (
@@ -99,7 +98,7 @@ export const HistoryList = ({ runs, selectedRunId, onSelectRun, onDeleteRun }: H
               className="grid grid-cols-3 gap-2 p-3"
             >
               {runs.map((run) => {
-                const thumbnail = getRunThumbnail(run);
+                const thumbnailAsset = getRunThumbnailAsset(run);
                 const isSelected = run.id === selectedRunId;
                 return (
                   <div
@@ -107,13 +106,11 @@ export const HistoryList = ({ runs, selectedRunId, onSelectRun, onDeleteRun }: H
                     className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-colors group ${isSelected ? "border-primary shadow-lg ring-2 ring-primary/10" : "border-black/10 hover:border-black/20"}`}
                     onClick={() => onSelectRun(run.id)}
                   >
-                    {thumbnail ? (
-                      <img
-                        src={thumbnail}
+                    {thumbnailAsset ? (
+                      <RunThumbnailImage
+                        thumbnailUri={thumbnailAsset.thumbnailUri}
+                        uri={thumbnailAsset.uri}
                         alt={run.draft?.title || "Run thumbnail"}
-                        loading="lazy"
-                        decoding="async"
-                        className="absolute inset-0 w-full h-full object-contain bg-secondary/5"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-secondary/5 flex items-center justify-center p-4">
@@ -165,3 +162,34 @@ export const HistoryList = ({ runs, selectedRunId, onSelectRun, onDeleteRun }: H
     </div>
   );
 };
+
+function RunThumbnailImage({
+  thumbnailUri,
+  uri,
+  alt
+}: {
+  thumbnailUri?: string;
+  uri: string;
+  alt: string;
+}) {
+  const [src, setSrc] = useState(thumbnailUri ?? uri);
+
+  useEffect(() => {
+    setSrc(thumbnailUri ?? uri);
+  }, [thumbnailUri, uri]);
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      onError={() => {
+        if (src !== uri) {
+          setSrc(uri);
+        }
+      }}
+      className="absolute inset-0 w-full h-full object-contain bg-secondary/5"
+    />
+  );
+}

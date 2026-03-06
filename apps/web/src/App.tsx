@@ -441,10 +441,11 @@ function App() {
     if (!selectedRun) return;
     try {
       setBusy(true);
-      if (prompt) {
-        setImageStyleInstruction(prompt);
-      }
-      await apiClient.retryStep(selectedRun.id, { stepName: "image_agent" });
+      setImageStyleInstruction(prompt);
+      await apiClient.retryStep(selectedRun.id, {
+        stepName: "image_agent",
+        imageStyleInstruction: prompt
+      });
       setPaneView("publishing");
     } catch (retryError) {
       setError(retryError instanceof Error ? retryError.message : String(retryError));

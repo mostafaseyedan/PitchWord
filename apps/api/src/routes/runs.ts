@@ -58,7 +58,8 @@ const manualSchema = z.object({
 });
 
 const retryStepSchema = z.object({
-  stepName: z.enum(["news_hunter", "content_creator", "image_agent", "video_agent", "teams_delivery"])
+  stepName: z.enum(["news_hunter", "content_creator", "image_agent", "video_agent", "teams_delivery"]),
+  imageStyleInstruction: z.string().max(8000).optional()
 });
 
 const postToTeamsSchema = z.object({

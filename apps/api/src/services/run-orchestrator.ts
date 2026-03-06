@@ -199,7 +199,7 @@ export class RunOrchestrator {
   }
 
   async retryStep(runId: string, request: RetryStepRequest): Promise<Run> {
-    const run = await this.requireRun(runId);
+    let run = await this.requireRun(runId);
 
     if (request.stepName === "video_agent") {
       if (!run.draft) {
@@ -217,6 +217,22 @@ export class RunOrchestrator {
 
     if (request.stepName === "teams_delivery") {
       throw new Error("Use the 'Send to user' action to deliver to Teams. Retry is not supported for DM delivery.");
+    }
+
+    if (request.stepName === "image_agent") {
+      const nextImageStyleInstruction = request.imageStyleInstruction?.trim() || undefined;
+      const updatedRun = await this.repository.updateRun(run.id, (current) => ({
+        ...current,
+        input: {
+          ...current.input,
+          imageStyleInstruction: nextImageStyleInstruction,
+          resolvedImagePrompt: undefined
+        }
+      }));
+      if (!updatedRun) {
+        throw new Error(`Run ${run.id} not found while updating image prompt.`);
+      }
+      run = updatedRun;
     }
 
     await this.executeRun(runId);
